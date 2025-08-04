@@ -1,0 +1,8 @@
+dist
+
+*.csv
+node_modules
+output
+cache
+
+.env
