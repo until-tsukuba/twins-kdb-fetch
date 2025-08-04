@@ -11,6 +11,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      UTID_NAME: ${{ secrets.UTID_NAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
