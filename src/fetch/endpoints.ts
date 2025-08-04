@@ -25,11 +25,8 @@ export default {
         },
         async changeHierarchy(flow: FlowType, index: number, hierarchy: Hierarchy) {
             const form = generateKdbSearchForm(eventIds.kdb.changeHierarchySet, index + "", hierarchy);
-            console.log("changeHierarchy form: ", form.toString());
 
             const res = await req(endpoints.square, flow, form);
-            console.log("changeHierarchy response: ", res);
-            console.log("changeHierarchy ", res.type === "arrayBuffer" && Buffer.from(res.ab).toString("utf8"));
             assertRedirect(res);
 
             return getFlowFromRes(res);
