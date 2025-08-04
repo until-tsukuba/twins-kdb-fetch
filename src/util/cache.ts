@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 export type Serializer<T> = {
     serialize: (obj: T) => string;
@@ -38,6 +38,7 @@ export const cache =
             return cached;
         } catch (error) {
             const result = await calc(...props);
+            await mkdir("cache", { recursive: true });
             await writeFile(`cache/${cacheKey}`, serializer.serialize(result), "utf8");
             return result;
         }
