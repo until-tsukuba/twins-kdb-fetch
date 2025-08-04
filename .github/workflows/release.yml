@@ -1,0 +1,45 @@
+name: release
+run-name: release
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: '0 16 * * *'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: setup git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - id: new_version
+        name: generate new version
+        run: |
+          new_version=$(date +%Y.%m.%d)
+          echo "New version: $new_version"
+          echo "tag=$new_version" >> "$GITHUB_OUTPUT"
+      - name: set tag
+        run: git tag -a ${{ steps.new_version.outputs.tag }} -m "Release ${{ steps.new_version.outputs.tag }}"
+      - run: git push origin ${{ steps.new_version.outputs.tag }}
+
+      - name: install dependencies
+        run: |
+          npm ci
+      - name: build
+        run: |
+          npm run build && npm run start
+      - name: create release
+        run: |
+          cd output
+          gh release create ${{ steps.new_version.outputs.tag }} tree.kdb.json subjects.flat.kdb.json hierarchy.kdb.txt subjects.twins.json subjects.merged.json irregularSubjects.txt --title "Release ${{ steps.new_version.outputs.tag }}" --generate-notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
