@@ -153,27 +153,40 @@ type MergedSubject = {
 ```
 
 ### output/subjects.merged.json
+    [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.merged.json)
     全てを合わせたデータ
     `MergedSubject[]`
 
 ### output/tree.kdb.json
+    [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/tree.kdb.json)
     KdBから取得した木構造のデータ
 
 ### output/subjects.flat.kdb.json
+    [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.flat.kdb.json)
     KdBから取得した木構造のデータをフラットにしたもの
     `SubjectRecordWithHierarchy[]`
 
 ### output/hierarchy.kdb.txt
+    [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/hierarchy.kdb.txt)
     KdBのhierarchyのデータをテキストで読めるもの
 
 ### output/subjects.twins.json
+    [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.twins.json)
     TWINSから持ってきたデータ
     `TwinsSubject[]`
 
 ### output/irregularSubjects.txt
+    [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/irregularSubjects.txt)
     TWINSとKdBで異なるデータ
 
+## 最新のデータをダウンロードするスクリプト
+以下のスクリプトを実行すると、最新の科目データを`src/content/subjects.merged.json`にダウンロードします。
 
+```bash
+#!/usr/bin/env bash
+
+curl -Lo src/content/subjects.merged.json "https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.merged.json"
+```
 
 ## 導入
 ```sh
