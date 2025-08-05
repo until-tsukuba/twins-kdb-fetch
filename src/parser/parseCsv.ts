@@ -1,7 +1,7 @@
 import { commonHeader, SubjectRecord } from "../util/subjectRecord.js";
 import { ParsedKdbTableType } from "./types.js";
 
-const parseLine = (line: string, i: number) => {
+const parseLine = (line: string, i: number, fileName?: string) => {
     const tokens = line.trim().split('"');
     const records: string[][] = [];
     let state = "start"; // 'start' | 'text' | 'mid'
@@ -39,17 +39,17 @@ const parseLine = (line: string, i: number) => {
     return records.map((v) => v.join('"'));
 };
 
-export const getSubjectsRecord = (csvStr: string): ParsedKdbTableType => {
+export const getSubjectsRecord = (csvStr: string, fileName?: string): ParsedKdbTableType => {
     const lines = csvStr.split("\n");
     if (lines.length === 3) {
-        console.log("* no subject");
+        console.log(`* no subject in file: ${fileName || 'unknown'}`);
         return [];
     }
     if (lines.length < 3) {
         throw "! unknown";
     }
 
-    const parsed = lines.map(parseLine);
+    const parsed = lines.map((line, i) => parseLine(line, i, fileName));
 
     const results: { category: string; subjects: SubjectRecord[] }[] = [];
 

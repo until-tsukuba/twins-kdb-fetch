@@ -37,7 +37,7 @@ const getSubjectRecords = async (flow: FlowType, hierarchy: Hierarchy) => {
     const downloadFlow = await endpoints.kdb.outputCsv(newFlow, hierarchy);
     const csv = await endpoints.getContent(downloadFlow, "shift-jis");
 
-    const categories = getSubjectsRecord(csv);
+    const categories = getSubjectsRecord(csv, `${hierarchy.serialize()}.csv`);
 
     const subCategories = buildKdbSubCategories(categories);
     const subjects = createLeafResultNode(hierarchy, subCategories);
