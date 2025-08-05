@@ -48,8 +48,7 @@ type InstructionalType =
     | { text: "講義、演習及び実習･実験･実技", flags: { 講義: true, 演習: true, "実習･実験･実技": true, "卒業論文･卒業研究等": false, その他: false } }
     | { text: "卒業論文･卒業研究等", flags: { 講義: false, 演習: false, "実習･実験･実技": false, "卒業論文･卒業研究等": true, その他: false } }
 
-
-type SubjectRecordWithHierarchy = {
+type SubjectRecord = {
     courseNumber: string; // 科目番号
     courseName: string; // 科目名
     courseType: InstructionalType & {
@@ -79,6 +78,8 @@ type SubjectRecordWithHierarchy = {
     dataUpdateDate: string; // データ更新日
     hierarchy: Hierarchy[];
 }
+
+type SubjectRecordWithHierarchy = SubjectRecord & { hierarchy: Hierarchy[]; };
 
 type MergedSubject = {
     code: string;
@@ -150,30 +151,79 @@ type MergedSubject = {
 
     hierarchy: Hierarchy[];
 };
+
+type SubjectNode = {
+    type: "subject";
+    node: Hierarchy;
+    subject: SubjectRecord;
+    children: null;
+};
+
+type SubCategoryNode = {
+    type: "sub_category";
+    node: Hierarchy;
+    children: SubjectNode[];
+};
+
+type TreeNode = 
+    | {
+          type: "internal";
+          node: Hierarchy;
+          children: TreeNode[];
+      }
+    | {
+          type: "leaf";
+          node: Hierarchy;
+          children: (SubCategoryNode | SubjectNode)[];
+      };
 ```
 
 ### output/subjects.merged.json
-    全てを合わせたデータ
-    `MergedSubject[]`
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.merged.json)
+
+全てを合わせたデータ
+
+型: `MergedSubject[]`
 
 ### output/tree.kdb.json
-    KdBから取得した木構造のデータ
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/tree.kdb.json)
+
+KdBから取得した木構造のデータ
+
+型: `TreeNode[]`
 
 ### output/subjects.flat.kdb.json
-    KdBから取得した木構造のデータをフラットにしたもの
-    `SubjectRecordWithHierarchy[]`
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.flat.kdb.json)
+
+KdBから取得した木構造のデータをフラットにしたもの
+
+型: `SubjectRecordWithHierarchy[]`
 
 ### output/hierarchy.kdb.txt
-    KdBのhierarchyのデータをテキストで読めるもの
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/hierarchy.kdb.txt)
+
+KdBのhierarchyのデータをテキストで読めるもの
 
 ### output/subjects.twins.json
-    TWINSから持ってきたデータ
-    `TwinsSubject[]`
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.twins.json)
+
+TWINSから持ってきたデータ
+
+型: `TwinsSubject[]`
 
 ### output/irregularSubjects.txt
-    TWINSとKdBで異なるデータ
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/irregularSubjects.txt)
 
+TWINSとKdBで異なるデータ
 
+## 最新のデータをダウンロードするスクリプト
+以下のスクリプトを実行すると、最新の科目データを`src/content/subjects.merged.json`にダウンロードします。
+
+```bash
+#!/usr/bin/env bash
+
+curl -Lo src/content/subjects.merged.json "https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.merged.json"
+```
 
 ## 導入
 ```sh
