@@ -1,3 +1,195 @@
-# KdBとTWINSから持ってきます。
+# twins-kdb-fetch
+## About
+**このプログラムでは認証が必要な`https://twins.tsukuba.ac.jp/`にはアクセスしていません。**
 
-.env_template を.envにコピーし必要な項目を書き、`npm run build && npm run start`をします。
+TWINSの科目検索ページにはKdBよりもパースしやすいデータがあります。
+このプログラムではダウンロードした科目データを使いやすくパースしています。
+
+[最新のデータをリリースからダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest)
+
+## データフォーマット
+
+```typescript
+type Terms = { text: "春学期", code: "A" } | { text: "秋学期", code: "B" };
+type DaysOfWeek = "月" | "火" | "水" | "木" | "金" | "土" | "日" | "他";
+type Periods = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+type TimeTable = {
+    day: DaysOfWeek; // 曜日
+    period: Periods | null; // 時限
+};
+type Module = "springA" | "springB" | "springC" | "summerVacation" | "fallA" | "fallB" | "fallC" | "springVacation";
+type ModuleTimeTable = Record<Module, TimeTable[]>;
+
+type TwinsSubject = {
+    name: string; // 科目名
+    code: string; // 科目番号
+    term: Terms;
+    moduleTimeTable: ModuleTimeTable;
+    instructors: string[]; // 担当教員
+    affiliation: {
+        name: string; // 開設所属名
+        code: string; // 開設所属コード
+    };
+    year: number[]; // 標準履修年次
+
+    raw: [term: string, module: string, code: string, title: { text: string; onclick: string }, instructor: string, affiliation: string, year: string];
+};
+
+type Hierarchy = { value: string | null; text: string }[];
+
+type InstructionalType = 
+    | { text: "その他", flags: { 講義: false, 演習: false, "実習･実験･実技": false, "卒業論文･卒業研究等": false, その他: true } }
+    | { text: "講義", flags: { 講義: true, 演習: false, "実習･実験･実技": false, "卒業論文･卒業研究等": false, その他: false } }
+    | { text: "演習", flags: { 講義: false, 演習: true, "実習･実験･実技": false, "卒業論文･卒業研究等": false, その他: false } }
+    | { text: "実習･実験･実技", flags: { 講義: false, 演習: false, "実習･実験･実技": true, "卒業論文･卒業研究等": false, その他: false } }
+    | { text: "講義及び演習", flags: { 講義: true, 演習: true, "実習･実験･実技": false, "卒業論文･卒業研究等": false, その他: false } }
+    | { text: "講義及び実習･実験･実技", flags: { 講義: true, 演習: false, "実習･実験･実技": true, "卒業論文･卒業研究等": false, その他: false } }
+    | { text: "演習及び実習･実験･実技", flags: { 講義: false, 演習: true, "実習･実験･実技": true, "卒業論文･卒業研究等": false, その他: false } }
+    | { text: "講義、演習及び実習･実験･実技", flags: { 講義: true, 演習: true, "実習･実験･実技": true, "卒業論文･卒業研究等": false, その他: false } }
+    | { text: "卒業論文･卒業研究等", flags: { 講義: false, 演習: false, "実習･実験･実技": false, "卒業論文･卒業研究等": true, その他: false } }
+
+
+type SubjectRecordWithHierarchy = {
+    courseNumber: string; // 科目番号
+    courseName: string; // 科目名
+    courseType: InstructionalType & {
+        code: string;
+    }; // 授業方法
+    credits: {
+        text: string;
+        value: number | null;
+    }; // 単位数
+    year: {
+        text: string;
+        value: number[];
+    }; // 標準履修年次
+    term: string; // 実施学期
+    weekdayAndPeriod: string; // 曜時限
+    classroom: string; // 教室
+    instructor: string; // 担当教員
+    overview: string; // 授業概要
+    remarks: string; // 備考
+    auditor: string; // 科目等履修生申請可否
+    conditionsForAuditors: string; // 申請条件
+    exchangeStudent: string; // 短期留学生申請可否
+    conditionsForExchangeStudents: string; // 申請条件
+    JaEnCourseName: string; // 英語(日本語)科目名
+    parentNumber: string; // 科目コード
+    parentCourseName: string; // 要件科目名
+    dataUpdateDate: string; // データ更新日
+    hierarchy: Hierarchy[];
+}
+
+type MergedSubject = {
+    code: string;
+    name: string;
+    instructionalType: {
+        value: InstructionalType | undefined;
+        kdbRaw: string | undefined;
+    };
+    credits: {
+        value:
+            | {
+                  type: "number";
+                  value: number;
+              }
+            | {
+                  type: "none";
+              }
+            | undefined;
+        kdbRaw: string | undefined;
+    };
+    year: {
+        value: number[];
+        kdbRaw: string | undefined;
+        twinsRaw: string | undefined;
+    };
+    terms: {
+        term: Terms | undefined;
+        module: string | undefined;
+        weekdayAndPeriod: string | undefined;
+        moduleTimeTable: ModuleTimeTable | undefined;
+
+        twinsRaw:
+            | {
+                  term: string;
+                  module: string;
+              }
+            | undefined;
+    };
+    classroom: null;
+    instructor: {
+        value: string[] | undefined;
+
+        kdbRaw: string | undefined;
+        twinsRaw: string | undefined;
+    };
+    overview: string | undefined;
+    remarks: string | undefined;
+    auditor: string | undefined;
+    conditionsForAuditors: string | undefined;
+    exchangeStudent: string | undefined;
+    conditionsForExchangeStudents: string | undefined;
+    JaEnCourseName: string | undefined;
+    parentNumber: string | undefined;
+    parentCourseName: string | undefined;
+
+    affiliation: {
+        name: string | undefined;
+        code: string | undefined;
+
+        twinsRaw:
+            | {
+                  name: string;
+                  code: string;
+              }
+            | undefined;
+    };
+
+    kdbDataUpdateDate: string | undefined;
+
+    hierarchy: Hierarchy[];
+};
+```
+
+### output/subjects.merged.json
+    全てを合わせたデータ
+    `MergedSubject[]`
+
+### output/tree.kdb.json
+    KdBから取得した木構造のデータ
+
+### output/subjects.flat.kdb.json
+    KdBから取得した木構造のデータをフラットにしたもの
+    `SubjectRecordWithHierarchy[]`
+
+### output/hierarchy.kdb.txt
+    KdBのhierarchyのデータをテキストで読めるもの
+
+### output/subjects.twins.json
+    TWINSから持ってきたデータ
+    `TwinsSubject[]`
+
+### output/irregularSubjects.txt
+    TWINSとKdBで異なるデータ
+
+
+
+## 導入
+```sh
+$ git clone https://github.com/until-tsukuba/twins-kdb-fetch.git && npm ci
+```
+
+## 使い方
+
+```
+$ cp .env_template .env
+$ vim .env
+$ npm run build && npm run start
+```
+
+または
+
+```sh
+$ npm run build && UTID_NAME=s******* PASSWORD=******** npm run start
+```
