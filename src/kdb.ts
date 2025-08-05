@@ -81,8 +81,6 @@ export const getKdbData = async () => {
 
     const subjectCategoryText = createTreeText(tree);
 
-    console.log("tree: ", JSON.stringify(tree, null, 4));
-
     await writeFile("output/tree.kdb.json", JSON.stringify(tree, null, 4), "utf8");
     await writeFile("output/subjects.flat.kdb.json", JSON.stringify(subjectsFlatList, null, 4), "utf8");
     await writeFile("output/hierarchy.kdb.txt", subjectCategoryText, "utf8");

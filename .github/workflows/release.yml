@@ -11,9 +11,6 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    env:
-      UTID_NAME: ${{ secrets.UTID_NAME }}
-      PASSWORD: ${{ secrets.PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,6 +35,9 @@ jobs:
         run: |
           npm ci
       - name: build
+        env:
+          UTID_NAME: ${{ secrets.UTID_NAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
         run: |
           npm run build && npm run start
       - name: create release
