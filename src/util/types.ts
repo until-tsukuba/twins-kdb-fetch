@@ -26,7 +26,13 @@ export class Hierarchy {
         return choices.map((choice) => this.pushed(choice.value, choice.text));
     }
     static root = new Hierarchy([]);
-    toJSON(): HierarchyType {
+    toCacheJSON() {
+        return { type: "hierarchy", hierarchy: this.hierarchy };
+    }
+    static fromCacheJSON(value: { type: "hierarchy"; hierarchy: HierarchyType }) {
+        return new Hierarchy(value.hierarchy);
+    }
+    toOutputJSON() {
         return this.hierarchy;
     }
 }

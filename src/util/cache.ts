@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { Hierarchy } from "./types.js";
 
 export type Serializer<T> = {
     serialize: (obj: T) => string;
@@ -7,10 +8,24 @@ export type Serializer<T> = {
 
 export const JSONSerializer: <T>() => Serializer<T> = () => ({
     serialize: (obj) => {
-        return JSON.stringify(obj, null, 4);
+        return JSON.stringify(
+            obj,
+            (_key, value) => {
+                if (value instanceof Hierarchy) {
+                    return value.toCacheJSON();
+                }
+                return value;
+            },
+            4
+        );
     },
     deserialize: (str) => {
-        return JSON.parse(str);
+        return JSON.parse(str, (_key, value) => {
+            if (typeof value === "object" && value !== null && "type" in value && value.type === "hierarchy") {
+                return Hierarchy.fromCacheJSON(value);
+            }
+            return value;
+        });
     },
 });
 

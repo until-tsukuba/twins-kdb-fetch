@@ -27,7 +27,7 @@ const getNextHierarchy = async (flow: FlowType, hierarchy: Hierarchy) => {
 };
 
 const getNextHierarchyWithCache = cache(
-    (_flow: FlowType, hierarchy: Hierarchy) => `${hierarchy.serialize()}.hierarchy.json`,
+    (_flow: FlowType, hierarchy: Hierarchy) => `${hierarchy.serialize()}.children.json`,
     (flow: FlowType, hierarchy: Hierarchy) => getNextHierarchy(flow, hierarchy),
     JSONSerializer()
 );
@@ -37,7 +37,7 @@ const getSubjectRecords = async (flow: FlowType, hierarchy: Hierarchy) => {
     const downloadFlow = await endpoints.kdb.outputCsv(newFlow, hierarchy);
     const csv = await endpoints.getContent(downloadFlow, "shift-jis");
 
-    const categories = getSubjectsRecord(csv, `${hierarchy.serialize()}.csv`);
+    const categories = getSubjectsRecord(csv, `${hierarchy.serialize()}.subjects.json`);
 
     const subCategories = buildKdbSubCategories(categories);
     const subjects = createLeafResultNode(hierarchy, subCategories);
@@ -46,7 +46,7 @@ const getSubjectRecords = async (flow: FlowType, hierarchy: Hierarchy) => {
 };
 
 const getSubjectRecordsWithCache = cache(
-    (_flow: FlowType, hierarchy: Hierarchy) => `${hierarchy.serialize()}.csv`,
+    (_flow: FlowType, hierarchy: Hierarchy) => `${hierarchy.serialize()}.subjects.json`,
     (flow: FlowType, hierarchy: Hierarchy) => getSubjectRecords(flow, hierarchy),
     JSONSerializer()
 );
@@ -81,8 +81,34 @@ export const getKdbData = async () => {
 
     const subjectCategoryText = createTreeText(tree);
 
-    await writeFile("output/tree.kdb.json", JSON.stringify(tree, null, 4), "utf8");
-    await writeFile("output/subjects.flat.kdb.json", JSON.stringify(subjectsFlatList, null, 4), "utf8");
+    await writeFile(
+        "output/tree.kdb.json",
+        JSON.stringify(
+            tree,
+            (_key, value) => {
+                if (value instanceof Hierarchy) {
+                    return value.toOutputJSON();
+                }
+                return value;
+            },
+            4
+        ),
+        "utf8"
+    );
+    await writeFile(
+        "output/subjects.flat.kdb.json",
+        JSON.stringify(
+            subjectsFlatList,
+            (_key, value) => {
+                if (value instanceof Hierarchy) {
+                    return value.toOutputJSON();
+                }
+                return value;
+            },
+            4
+        ),
+        "utf8"
+    );
     await writeFile("output/hierarchy.kdb.txt", subjectCategoryText, "utf8");
 
     return {
