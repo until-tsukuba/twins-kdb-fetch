@@ -3,7 +3,7 @@ import { getKdbData } from "./kdb.js";
 import { ModuleTimeTable, Terms } from "./parser/buildTwinsSubjectList";
 import { getTwinsData } from "./twins.js";
 import { InstructionalType } from "./util/instructionalType";
-import { Hierarchy } from "./util/types";
+import { Hierarchy } from "./util/types.js";
 
 type MergedSubject = {
     code: string;
@@ -192,7 +192,20 @@ const main = async () => {
         };
     });
 
-    await writeFile("output/subjects.merged.json", JSON.stringify(mergedSubjects, null, 4), "utf8");
+    await writeFile(
+        "output/subjects.merged.json",
+        JSON.stringify(
+            mergedSubjects,
+            (_key, value) => {
+                if (value instanceof Hierarchy) {
+                    return value.toOutputJSON();
+                }
+                return value;
+            },
+            4
+        ),
+        "utf8"
+    );
 
     await writeFile("output/irregularSubjects.txt", irregularSubjects.map((v) => `${v.key}: ${v.reason}`).join("\n"), "utf8");
 };
