@@ -1,5 +1,5 @@
 import { writeFile, mkdir } from "fs/promises";
-import { getKdbData } from "./kdb.js";
+import { getKdbTreeData } from "./kdbTree.js";
 import { ModuleTimeTable, Terms } from "./parser/buildTwinsSubjectList";
 import { getTwinsData } from "./twins.js";
 import { InstructionalType } from "./util/instructionalType";
@@ -85,7 +85,7 @@ const arrayShallowEqual = <T>(a: T[], b: T[]): boolean => {
 const main = async () => {
     await mkdir("output", { recursive: true });
 
-    const kdb = await getKdbData();
+    const kdb = await getKdbTreeData();
     const twins = await getTwinsData();
 
     const kdbSubjectsMap = new Map(kdb.subjectsFlatList.map((subject) => [subject.courseNumber, subject]));
