@@ -95,3 +95,43 @@ export const getSubjectsRecord = (csvStr: string, fileName?: string): ParsedKdbT
     }
     return results;
 };
+
+export const getRootSubjectsRecord = (csvStr: string, fileName?: string): RawSubjectRecord[] => {
+    const lines = csvStr.split("\n");
+    if (lines.length === 3) {
+        console.log(`* no subject in file: ${fileName || "unknown"}`);
+        return [];
+    }
+    if (lines.length < 3) {
+        throw "! unknown";
+    }
+
+    const parsed = lines.map((line, i) => parseLine(line, i, fileName));
+
+    const results: RawSubjectRecord[] = [];
+
+    let headers: string[] | null = null;
+
+    for (const line of parsed) {
+        if (line.length === 0) {
+            throw `! empty line ${line}`;
+        }
+        if (headers === null) {
+            headers = line;
+            if (!(commonHeader.length === headers.length && commonHeader.every((field, index) => line[index] === field.text))) {
+                throw `! invalid header, ${line}, ${headers}`;
+            }
+            continue;
+        }
+        if (line.length !== commonHeader.length) {
+            throw `! column count invalid, ${line}, ${commonHeader}`;
+        }
+        results.push(Object.fromEntries(line.map((field, i) => [commonHeader[i]?.key, field])));
+    }
+
+    if (results.length === 0) {
+        console.error("! empty file", parsed, commonHeader);
+        throw "";
+    }
+    return results;
+};
