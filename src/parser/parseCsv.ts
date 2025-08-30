@@ -113,6 +113,10 @@ export const getRootSubjectsRecord = (csvStr: string, fileName?: string): RawSub
     let headers: string[] | null = null;
 
     for (const line of parsed) {
+        if (line.length === 1 && line[0] === "") {
+            continue;
+        }
+
         if (line.length === 0) {
             throw `! empty line ${line}`;
         }
