@@ -1,5 +1,5 @@
 import { getInstructionalType } from "./instructionalType.js";
-import { SubjectRecord } from "./subjectRecord";
+import { RawSubjectRecord } from "./subjectRecord";
 
 export type ReadableSubjectRecord = {
     courseNumber: string; // 科目番号
@@ -53,7 +53,7 @@ const parseCredit = (text: string) => {
     return text.trim() === "-" ? null : +text.trim();
 };
 
-export const readableSubject = (subject: SubjectRecord): ReadableSubjectRecord => {
+export const readableSubject = (subject: RawSubjectRecord): ReadableSubjectRecord => {
     return {
         ...subject,
         courseType: {

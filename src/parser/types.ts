@@ -1,4 +1,4 @@
-import { SubjectRecord } from "../util/subjectRecord";
+import { RawSubjectRecord } from "../util/subjectRecord";
 
 export type ParsedHierarchyType = [{ value: string; text: string }[], { value: string; text: string }[], { value: string; text: string }[], { value: string; text: string }[], { value: string; text: string }[]];
 
@@ -9,5 +9,5 @@ export type ParsedTwinsTableType = {
 
 export type ParsedKdbTableType = {
     category: string;
-    subjects: SubjectRecord[];
+    subjects: RawSubjectRecord[];
 }[];
