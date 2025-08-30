@@ -20,4 +20,4 @@ export const commonHeader = [
     { key: "dataUpdateDate", text: "データ更新日" },
 ] as const;
 
-export type SubjectRecord = Record<(typeof commonHeader)[number]["key"], string>;
+export type RawSubjectRecord = Record<(typeof commonHeader)[number]["key"], string>;

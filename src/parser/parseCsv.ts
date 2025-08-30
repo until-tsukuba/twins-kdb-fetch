@@ -1,4 +1,4 @@
-import { commonHeader, SubjectRecord } from "../util/subjectRecord.js";
+import { commonHeader, RawSubjectRecord } from "../util/subjectRecord.js";
 import { ParsedKdbTableType } from "./types.js";
 
 const parseLine = (line: string, i: number, fileName?: string) => {
@@ -51,7 +51,7 @@ export const getSubjectsRecord = (csvStr: string, fileName?: string): ParsedKdbT
 
     const parsed = lines.map((line, i) => parseLine(line, i, fileName));
 
-    const results: { category: string; subjects: SubjectRecord[] }[] = [];
+    const results: { category: string; subjects: RawSubjectRecord[] }[] = [];
 
     let headers: string[] | null = null;
 
