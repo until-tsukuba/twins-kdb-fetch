@@ -136,11 +136,7 @@ const main = async () => {
             });
         }
         if (!twinsSubject) {
-            console.warn(`* Subject ${key} not found in twins data`);
-            irregularSubjects.push({
-                key,
-                reason: "Not found in twins data",
-            });
+            // 今年度開講しない科目など
         }
 
         const choose = <T>(twins: T | undefined, kdb: T | undefined, compFunc?: (a: T, b: T) => boolean): T => {
