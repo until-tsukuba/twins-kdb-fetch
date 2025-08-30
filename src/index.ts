@@ -10,8 +10,8 @@ type MergedSubject = {
     code: string;
     name: string;
     instructionalType: {
-        value: InstructionalType | undefined;
-        kdbRaw: string | undefined;
+        value: InstructionalType | null;
+        kdbRaw: string | null;
     };
     credits: {
         value:
@@ -22,57 +22,53 @@ type MergedSubject = {
             | {
                   type: "none";
               }
-            | undefined;
-        kdbRaw: string | undefined;
+            | null;
+        kdbRaw: string | null;
     };
     year: {
         value: number[];
-        kdbRaw: string | undefined;
-        twinsRaw: string | undefined;
+        kdbRaw: string | null;
+        twinsRaw: string | null;
     };
     terms: {
-        term: Terms | undefined;
-        module: string | undefined;
-        weekdayAndPeriod: string | undefined;
-        moduleTimeTable: ModuleTimeTable | undefined;
+        term: Terms | null;
+        module: string | null;
+        weekdayAndPeriod: string | null;
+        moduleTimeTable: ModuleTimeTable | null;
 
-        twinsRaw:
-            | {
-                  term: string;
-                  module: string;
-              }
-            | undefined;
+        twinsRaw: {
+            term: string;
+            module: string;
+        } | null;
     };
     classroom: null;
     instructor: {
-        value: string[] | undefined;
+        value: string[];
 
-        kdbRaw: string | undefined;
-        twinsRaw: string | undefined;
+        kdbRaw: string | null;
+        twinsRaw: string | null;
     };
-    overview: string | undefined;
-    remarks: string | undefined;
-    auditor: string | undefined;
-    conditionsForAuditors: string | undefined;
-    exchangeStudent: string | undefined;
-    conditionsForExchangeStudents: string | undefined;
-    JaEnCourseName: string | undefined;
-    parentNumber: string | undefined;
-    parentCourseName: string | undefined;
+    overview: string | null;
+    remarks: string | null;
+    auditor: string | null;
+    conditionsForAuditors: string | null;
+    exchangeStudent: string | null;
+    conditionsForExchangeStudents: string | null;
+    JaEnCourseName: string | null;
+    parentNumber: string | null;
+    parentCourseName: string | null;
 
     affiliation: {
-        name: string | undefined;
-        code: string | undefined;
+        name: string | null;
+        code: string | null;
 
-        twinsRaw:
-            | {
-                  name: string;
-                  code: string;
-              }
-            | undefined;
+        twinsRaw: {
+            name: string;
+            code: string;
+        } | null;
     };
 
-    kdbDataUpdateDate: string | undefined;
+    kdbDataUpdateDate: string | null;
 
     hierarchy: Hierarchy[];
 };
@@ -163,64 +159,78 @@ const main = async () => {
             throw new Error(`No data found`);
         };
 
+        const creditValue = (() => {
+            if (!kdbFlatSubject) return null;
+            if (typeof kdbFlatSubject?.credits.value === "number") {
+                return { type: "number", value: kdbFlatSubject.credits.value } as const;
+            }
+            return { type: "none" } as const;
+        })();
+
         return {
             code: key,
             // 8310205
             name: choose(twinsSubject?.name, kdbFlatSubject?.courseName),
             instructionalType: {
-                value: kdbFlatSubject?.courseType,
-                kdbRaw: kdbFlatSubject?.courseType.code,
+                value: kdbFlatSubject?.courseType ?? null,
+                kdbRaw: kdbFlatSubject?.courseType.code ?? null,
             },
             credits: {
-                value: kdbFlatSubject && (typeof kdbFlatSubject?.credits.value === "number" ? { type: "number", value: kdbFlatSubject.credits.value } : { type: "none" }),
-                // TODO: clean
-                kdbRaw: kdbFlatSubject?.credits.text,
+                value: creditValue,
+                kdbRaw: kdbFlatSubject?.credits.text ?? null,
             },
             year: {
                 // BB11451
                 value: choose(twinsSubject?.year, kdbFlatSubject?.year.value, arrayShallowEqual),
-                kdbRaw: kdbFlatSubject?.year.text,
-                twinsRaw: twinsSubject?.raw[6],
+                kdbRaw: kdbFlatSubject?.year.text ?? null,
+                twinsRaw: twinsSubject?.raw[6] ?? null,
             },
             terms: {
-                term: twinsSubject?.term,
-                module: kdbFlatSubject?.term,
-                weekdayAndPeriod: kdbFlatSubject?.weekdayAndPeriod,
-                moduleTimeTable: twinsSubject?.moduleTimeTable,
+                term: twinsSubject?.term ?? null,
+                module: kdbFlatSubject?.term ?? null,
+                weekdayAndPeriod: kdbFlatSubject?.weekdayAndPeriod ?? null,
+                moduleTimeTable: twinsSubject?.moduleTimeTable ?? null,
 
-                twinsRaw: twinsSubject && {
-                    term: twinsSubject.raw[0],
-                    termCode: twinsSubject.raw[3].onclick,
-                    module: twinsSubject.raw[1],
-                },
+                twinsRaw: twinsSubject
+                    ? {
+                          term: twinsSubject.raw[0],
+                          termCode: twinsSubject.raw[3].onclick,
+                          module: twinsSubject.raw[1],
+                      }
+                    : null,
             },
             classroom: null,
             instructor: {
-                value: twinsSubject?.instructors ? kdbFlatSubject?.instructor.split(",").map((s) => s.trim()) : undefined, // TODO: clean
-                kdbRaw: kdbFlatSubject?.instructor,
-                twinsRaw: twinsSubject?.raw[4],
+                value: choose(
+                    twinsSubject?.instructors,
+                    kdbFlatSubject?.instructor.split(/,、，/).map((s) => s.trim())
+                ),
+                kdbRaw: kdbFlatSubject?.instructor ?? null,
+                twinsRaw: twinsSubject?.raw[4] ?? null,
             },
-            overview: kdbFlatSubject?.overview,
-            remarks: kdbFlatSubject?.remarks,
-            auditor: kdbFlatSubject?.auditor,
-            conditionsForAuditors: kdbFlatSubject?.conditionsForAuditors,
-            exchangeStudent: kdbFlatSubject?.exchangeStudent,
-            conditionsForExchangeStudents: kdbFlatSubject?.conditionsForExchangeStudents,
-            JaEnCourseName: kdbFlatSubject?.JaEnCourseName,
-            parentNumber: kdbFlatSubject?.parentNumber,
-            parentCourseName: kdbFlatSubject?.parentCourseName,
+            overview: kdbFlatSubject?.overview ?? null,
+            remarks: kdbFlatSubject?.remarks ?? null,
+            auditor: kdbFlatSubject?.auditor ?? null,
+            conditionsForAuditors: kdbFlatSubject?.conditionsForAuditors ?? null,
+            exchangeStudent: kdbFlatSubject?.exchangeStudent ?? null,
+            conditionsForExchangeStudents: kdbFlatSubject?.conditionsForExchangeStudents ?? null,
+            JaEnCourseName: kdbFlatSubject?.JaEnCourseName ?? null,
+            parentNumber: kdbFlatSubject?.parentNumber ?? null,
+            parentCourseName: kdbFlatSubject?.parentCourseName ?? null,
 
             affiliation: {
-                name: twinsSubject?.affiliation.name,
-                code: twinsSubject?.affiliation.code,
+                name: twinsSubject?.affiliation.name ?? null,
+                code: twinsSubject?.affiliation.code ?? null,
 
-                twinsRaw: twinsSubject && {
-                    name: twinsSubject.raw[5],
-                    code: twinsSubject.raw[3].onclick,
-                },
+                twinsRaw: twinsSubject
+                    ? {
+                          name: twinsSubject.raw[5],
+                          code: twinsSubject.raw[3].onclick,
+                      }
+                    : null,
             },
 
-            kdbDataUpdateDate: kdbFlatSubject?.dataUpdateDate,
+            kdbDataUpdateDate: kdbFlatSubject?.dataUpdateDate ?? null,
 
             hierarchy: kdbTreeSubject?.hierarchy || [], // kdbTreeSubject
         };

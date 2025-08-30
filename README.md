@@ -85,8 +85,8 @@ type MergedSubject = {
     code: string;
     name: string;
     instructionalType: {
-        value: InstructionalType | undefined;
-        kdbRaw: string | undefined;
+        value: InstructionalType | null;
+        kdbRaw: string | null;
     };
     credits: {
         value:
@@ -97,57 +97,57 @@ type MergedSubject = {
             | {
                   type: "none";
               }
-            | undefined;
-        kdbRaw: string | undefined;
+            | null;
+        kdbRaw: string | null;
     };
     year: {
         value: number[];
-        kdbRaw: string | undefined;
-        twinsRaw: string | undefined;
+        kdbRaw: string | null;
+        twinsRaw: string | null;
     };
     terms: {
-        term: Terms | undefined;
-        module: string | undefined;
-        weekdayAndPeriod: string | undefined;
-        moduleTimeTable: ModuleTimeTable | undefined;
+        term: Terms | null;
+        module: string | null;
+        weekdayAndPeriod: string | null;
+        moduleTimeTable: ModuleTimeTable | null;
 
         twinsRaw:
             | {
                   term: string;
                   module: string;
               }
-            | undefined;
+            | null;
     };
     classroom: null;
     instructor: {
-        value: string[] | undefined;
+        value: string[];
 
-        kdbRaw: string | undefined;
-        twinsRaw: string | undefined;
+        kdbRaw: string | null;
+        twinsRaw: string | null;
     };
-    overview: string | undefined;
-    remarks: string | undefined;
-    auditor: string | undefined;
-    conditionsForAuditors: string | undefined;
-    exchangeStudent: string | undefined;
-    conditionsForExchangeStudents: string | undefined;
-    JaEnCourseName: string | undefined;
-    parentNumber: string | undefined;
-    parentCourseName: string | undefined;
+    overview: string | null;
+    remarks: string | null;
+    auditor: string | null;
+    conditionsForAuditors: string | null;
+    exchangeStudent: string | null;
+    conditionsForExchangeStudents: string | null;
+    JaEnCourseName: string | null;
+    parentNumber: string | null;
+    parentCourseName: string | null;
 
     affiliation: {
-        name: string | undefined;
-        code: string | undefined;
+        name: string | null;
+        code: string | null;
 
         twinsRaw:
             | {
                   name: string;
                   code: string;
               }
-            | undefined;
+            | null;
     };
 
-    kdbDataUpdateDate: string | undefined;
+    kdbDataUpdateDate: string | null;
 
     hierarchy: Hierarchy[];
 };
