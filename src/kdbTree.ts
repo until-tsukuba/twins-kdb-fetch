@@ -62,7 +62,7 @@ const mutableFlow = (init: FlowType) => {
     };
 };
 
-export const getKdbData = async () => {
+export const getKdbTreeData = async () => {
     const flow = mutableFlow(await endpoints.kdb.init());
 
     const tree = await dfs<Hierarchy, LeafResultNode[]>(

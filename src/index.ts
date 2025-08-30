@@ -1,5 +1,6 @@
 import { writeFile, mkdir } from "fs/promises";
-import { getKdbData } from "./kdb.js";
+import { getKdbTreeData } from "./kdbTree.js";
+import { getKdbFlatData } from "./kdbFlat.js";
 import { ModuleTimeTable, Terms } from "./parser/buildTwinsSubjectList";
 import { getTwinsData } from "./twins.js";
 import { InstructionalType } from "./util/instructionalType";
@@ -85,24 +86,57 @@ const arrayShallowEqual = <T>(a: T[], b: T[]): boolean => {
 const main = async () => {
     await mkdir("output", { recursive: true });
 
-    const kdb = await getKdbData();
-    const twins = await getTwinsData();
+    console.log("Start fetching data...");
 
-    const kdbSubjectsMap = new Map(kdb.subjectsFlatList.map((subject) => [subject.courseNumber, subject]));
+    console.log("Start fetching kdb flat data...");
+    const kdbFlat = await getKdbFlatData();
+    console.log("Finished fetching kdb flat data.");
+
+    console.log("Start fetching twins data...");
+    const twins = await getTwinsData();
+    console.log("Finished fetching twins data.");
+
+    console.log("Start fetching kdb tree data...");
+    const kdbTree = await getKdbTreeData();
+    console.log("Finished fetching kdb tree data.");
+
+    console.log("Finished fetching data.");
+
+    const kdbFlatSubjectsMap = new Map(kdbFlat.map((subject) => [subject.courseNumber, subject]));
+    const kdbTreeSubjectsMap = new Map(kdbTree.subjectsFlatList.map((subject) => [subject.courseNumber, subject]));
     const twinsSubjectsMap = new Map(twins.map((subject) => [subject.code, subject]));
 
-    const mergedKey = [...new Set([...kdbSubjectsMap.keys(), ...twinsSubjectsMap.keys()])];
+    const mergedKey = [...new Set([...kdbFlatSubjectsMap.keys(), ...kdbTreeSubjectsMap.keys(), ...twinsSubjectsMap.keys()])];
 
     const irregularSubjects: { key: string; reason: string }[] = [];
 
     const mergedSubjects: MergedSubject[] = mergedKey.map((key) => {
         console.log(`Processing subject: ${key}`);
 
-        const kdbSubject = kdbSubjectsMap.get(key);
+        const kdbFlatSubject = kdbFlatSubjectsMap.get(key);
+        const kdbTreeSubject = kdbTreeSubjectsMap.get(key);
         const twinsSubject = twinsSubjectsMap.get(key);
 
-        if (!kdbSubject && !twinsSubject) {
+        if (!kdbFlatSubject && !kdbTreeSubject && !twinsSubject) {
             throw new Error(`No subject found for key: ${key}`);
+        }
+
+        if (!kdbFlatSubject) {
+            console.warn(`* Subject ${key} not found in kdb flat data`);
+            irregularSubjects.push({
+                key,
+                reason: "Not found in kdb flat data",
+            });
+        }
+        if (!kdbTreeSubject) {
+            console.warn(`* Subject ${key} not found in kdb tree data`);
+            irregularSubjects.push({
+                key,
+                reason: "Not found in kdb tree data",
+            });
+        }
+        if (!twinsSubject) {
+            // 今年度開講しない科目など
         }
 
         const choose = <T>(twins: T | undefined, kdb: T | undefined, compFunc?: (a: T, b: T) => boolean): T => {
@@ -132,26 +166,26 @@ const main = async () => {
         return {
             code: key,
             // 8310205
-            name: choose(twinsSubject?.name, kdbSubject?.courseName),
+            name: choose(twinsSubject?.name, kdbFlatSubject?.courseName),
             instructionalType: {
-                value: kdbSubject?.courseType,
-                kdbRaw: kdbSubject?.courseType.code,
+                value: kdbFlatSubject?.courseType,
+                kdbRaw: kdbFlatSubject?.courseType.code,
             },
             credits: {
-                value: kdbSubject && (typeof kdbSubject?.credits.value === "number" ? { type: "number", value: kdbSubject.credits.value } : { type: "none" }),
+                value: kdbFlatSubject && (typeof kdbFlatSubject?.credits.value === "number" ? { type: "number", value: kdbFlatSubject.credits.value } : { type: "none" }),
                 // TODO: clean
-                kdbRaw: kdbSubject?.credits.text,
+                kdbRaw: kdbFlatSubject?.credits.text,
             },
             year: {
                 // BB11451
-                value: choose(twinsSubject?.year, kdbSubject?.year.value, arrayShallowEqual),
-                kdbRaw: kdbSubject?.year.text,
+                value: choose(twinsSubject?.year, kdbFlatSubject?.year.value, arrayShallowEqual),
+                kdbRaw: kdbFlatSubject?.year.text,
                 twinsRaw: twinsSubject?.raw[6],
             },
             terms: {
                 term: twinsSubject?.term,
-                module: kdbSubject?.term,
-                weekdayAndPeriod: kdbSubject?.weekdayAndPeriod,
+                module: kdbFlatSubject?.term,
+                weekdayAndPeriod: kdbFlatSubject?.weekdayAndPeriod,
                 moduleTimeTable: twinsSubject?.moduleTimeTable,
 
                 twinsRaw: twinsSubject && {
@@ -162,19 +196,19 @@ const main = async () => {
             },
             classroom: null,
             instructor: {
-                value: twinsSubject?.instructors ? kdbSubject?.instructor.split(",").map((s) => s.trim()) : undefined, // TODO: clean
-                kdbRaw: kdbSubject?.instructor,
+                value: twinsSubject?.instructors ? kdbFlatSubject?.instructor.split(",").map((s) => s.trim()) : undefined, // TODO: clean
+                kdbRaw: kdbFlatSubject?.instructor,
                 twinsRaw: twinsSubject?.raw[4],
             },
-            overview: kdbSubject?.overview,
-            remarks: kdbSubject?.remarks,
-            auditor: kdbSubject?.auditor,
-            conditionsForAuditors: kdbSubject?.conditionsForAuditors,
-            exchangeStudent: kdbSubject?.exchangeStudent,
-            conditionsForExchangeStudents: kdbSubject?.conditionsForExchangeStudents,
-            JaEnCourseName: kdbSubject?.JaEnCourseName,
-            parentNumber: kdbSubject?.parentNumber,
-            parentCourseName: kdbSubject?.parentCourseName,
+            overview: kdbFlatSubject?.overview,
+            remarks: kdbFlatSubject?.remarks,
+            auditor: kdbFlatSubject?.auditor,
+            conditionsForAuditors: kdbFlatSubject?.conditionsForAuditors,
+            exchangeStudent: kdbFlatSubject?.exchangeStudent,
+            conditionsForExchangeStudents: kdbFlatSubject?.conditionsForExchangeStudents,
+            JaEnCourseName: kdbFlatSubject?.JaEnCourseName,
+            parentNumber: kdbFlatSubject?.parentNumber,
+            parentCourseName: kdbFlatSubject?.parentCourseName,
 
             affiliation: {
                 name: twinsSubject?.affiliation.name,
@@ -186,9 +220,9 @@ const main = async () => {
                 },
             },
 
-            kdbDataUpdateDate: kdbSubject?.dataUpdateDate,
+            kdbDataUpdateDate: kdbFlatSubject?.dataUpdateDate,
 
-            hierarchy: kdbSubject?.hierarchy || [],
+            hierarchy: kdbTreeSubject?.hierarchy || [], // kdbTreeSubject
         };
     });
 
