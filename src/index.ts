@@ -5,6 +5,7 @@ import { ModuleTimeTable, Terms } from "./parser/buildTwinsSubjectList";
 import { getTwinsData } from "./twins.js";
 import { InstructionalType } from "./util/instructionalType";
 import { Hierarchy } from "./util/types.js";
+import { outputReplacer } from './util/jsonReplacer.js';
 
 type MergedSubject = {
     code: string;
@@ -240,12 +241,7 @@ const main = async () => {
         "output/subjects.merged.json",
         JSON.stringify(
             mergedSubjects,
-            (_key, value) => {
-                if (value instanceof Hierarchy) {
-                    return value.toOutputJSON();
-                }
-                return value;
-            },
+            outputReplacer,
             4
         ),
         "utf8"
