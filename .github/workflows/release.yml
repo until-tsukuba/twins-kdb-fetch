@@ -43,6 +43,6 @@ jobs:
       - name: create release
         run: |
           cd output
-          gh release create ${{ steps.new_version.outputs.tag }} tree.kdb.json subjects.flat.kdb.json hierarchy.kdb.txt subjects.twins.json subjects.merged.json irregularSubjects.txt --title "Release ${{ steps.new_version.outputs.tag }}" --generate-notes
+          gh release create ${{ steps.new_version.outputs.tag }} tree.kdb.json subjects.flat.kdb.json subjects.flat.shallow.kdb.json hierarchy.kdb.txt subjects.twins.json subjects.merged.json irregularSubjects.txt --title "Release ${{ steps.new_version.outputs.tag }}" --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -43,6 +43,9 @@ const parseYear = (text: string) => {
                 return [...Array(last - first + 1)].map((_, i) => i + first);
             } else {
                 const val = +t;
+                if (isNaN(val)) {
+                    return [];
+                }
                 return [val];
             }
         })
