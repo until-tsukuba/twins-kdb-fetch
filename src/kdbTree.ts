@@ -15,6 +15,7 @@ import { createTreeText } from "./tree/createTreeText.js";
 
 import { cache, JSONSerializer } from "./util/cache.js";
 import { Hierarchy } from "./util/types.js";
+import { outputReplacer } from "./util/jsonReplacer.js";
 
 const getNextHierarchy = async (flow: FlowType, hierarchy: Hierarchy) => {
     const newFlow = await endpoints.kdb.changeHierarchy(flow, Math.max(hierarchy.getLength(), 1), hierarchy);
@@ -81,34 +82,8 @@ export const getKdbTreeData = async () => {
 
     const subjectCategoryText = createTreeText(tree);
 
-    await writeFile(
-        "output/tree.kdb.json",
-        JSON.stringify(
-            tree,
-            (_key, value) => {
-                if (value instanceof Hierarchy) {
-                    return value.toOutputJSON();
-                }
-                return value;
-            },
-            4
-        ),
-        "utf8"
-    );
-    await writeFile(
-        "output/subjects.flat.kdb.json",
-        JSON.stringify(
-            subjectsFlatList,
-            (_key, value) => {
-                if (value instanceof Hierarchy) {
-                    return value.toOutputJSON();
-                }
-                return value;
-            },
-            4
-        ),
-        "utf8"
-    );
+    await writeFile("output/tree.kdb.json", JSON.stringify(tree, outputReplacer, 4), "utf8");
+    await writeFile("output/subjects.flat.kdb.json", JSON.stringify(subjectsFlatList, outputReplacer, 4), "utf8");
     await writeFile("output/hierarchy.kdb.txt", subjectCategoryText, "utf8");
 
     return {
