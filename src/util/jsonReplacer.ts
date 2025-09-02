@@ -1,4 +1,4 @@
-import { Hierarchy } from "./types";
+import { Hierarchy } from "./types.js";
 
 export const outputReplacer = (_key: string, value: unknown) => {
     if (typeof value === "number" && (isNaN(value) || !isFinite(value))) {
