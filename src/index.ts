@@ -204,7 +204,8 @@ const main = async () => {
             instructor: {
                 value: choose(
                     twinsSubject?.instructors,
-                    kdbFlatSubject?.instructor.split(/,、，/).map((s) => s.trim())
+                    kdbFlatSubject?.instructor.split(/[,、，]/).map((s) => s.trim()),
+                    arrayShallowEqual
                 ),
                 kdbRaw: kdbFlatSubject?.instructor ?? null,
                 twinsRaw: twinsSubject?.raw[4] ?? null,
