@@ -39,7 +39,7 @@ export type TwinsSubject = {
     instructors: string[]; // 担当教員
     affiliation: {
         name: string; // 開設所属名
-        code: string; // 開設所属コード
+        code: string | null; // 開設所属コード
     };
     year: number[]; // 標準履修年次
 
@@ -237,20 +237,37 @@ const buildTwinsSubject = (row: ParsedTwinsTableType["body"][number]): TwinsSubj
         throw new Error(`Course code is not a string: ${JSON.stringify(courseCode)}`);
     }
 
-    const courseTitle = row[4];
-    if (typeof courseTitle !== "object" || !courseTitle.text || !courseTitle.onclick) {
-        throw new Error(`Course title is not a valid object: ${JSON.stringify(courseTitle)}`);
-    }
-    const courseOnclick = parseTitleOnclick(courseTitle.onclick);
-    if (courseOnclick.termCode !== term.code) {
-        throw new Error(`Course term code mismatch: expected ${term.code}, got ${courseOnclick.termCode}`);
-    }
-    if (courseOnclick.courseCode !== courseCode) {
-        throw new Error(`Course code mismatch: expected ${courseCode}, got ${courseOnclick.courseCode}`);
-    }
-    if (courseOnclick.title !== courseTitle.text) {
-        throw new Error(`Course title mismatch: expected ${courseTitle.text}, got ${courseOnclick.title}`);
-    }
+    const courseTitleValue = ((courseTitleRaw) => {
+        if (typeof courseTitleRaw === "string") {
+            console.error(`定員に達しているため履修登録できません at ${courseCode}`);
+            return {
+                text: courseTitleRaw,
+                affiliationCode: null,
+                raw: {
+                    text: courseTitleRaw,
+                    onclick: "",
+                },
+            };
+        }
+        if (typeof courseTitleRaw !== "object" || !courseTitleRaw.text || !courseTitleRaw.onclick) {
+            throw new Error(`Course title is not a valid object: ${JSON.stringify(courseTitleRaw)} at ${courseCode}`);
+        }
+        const courseOnclick = parseTitleOnclick(courseTitleRaw.onclick);
+        if (courseOnclick.termCode !== term.code) {
+            throw new Error(`Course term code mismatch: expected ${term.code}, got ${courseOnclick.termCode}`);
+        }
+        if (courseOnclick.courseCode !== courseCode) {
+            throw new Error(`Course code mismatch: expected ${courseCode}, got ${courseOnclick.courseCode}`);
+        }
+        if (courseOnclick.title !== courseTitleRaw.text) {
+            throw new Error(`Course title mismatch: expected ${courseTitleRaw.text}, got ${courseOnclick.title}`);
+        }
+        return {
+            text: courseTitleRaw.text,
+            affiliationCode: courseOnclick.affiliationCode,
+            raw: courseTitleRaw,
+        };
+    })(row[4]);
 
     const instructors = row[5];
     if (typeof instructors !== "string") {
@@ -274,17 +291,17 @@ const buildTwinsSubject = (row: ParsedTwinsTableType["body"][number]): TwinsSubj
     const year = parseYear(yearString);
 
     return {
-        name: courseTitle.text,
+        name: courseTitleValue.text,
         code: courseCode,
         term,
         moduleTimeTable: moduleTimeTable,
         instructors: instructorList,
         affiliation: {
             name: affiliation,
-            code: courseOnclick.affiliationCode,
+            code: courseTitleValue.affiliationCode,
         },
         year,
-        raw: [termString, moduleString, courseCode, courseTitle, instructors, affiliation, yearString],
+        raw: [termString, moduleString, courseCode, courseTitleValue.raw, instructors, affiliation, yearString],
     };
 };
 

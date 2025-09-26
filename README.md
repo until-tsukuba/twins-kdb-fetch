@@ -28,7 +28,7 @@ type TwinsSubject = {
     instructors: string[]; // 担当教員
     affiliation: {
         name: string; // 開設所属名
-        code: string; // 開設所属コード
+        code: string | null; // 開設所属コード
     };
     year: number[]; // 標準履修年次
 
