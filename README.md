@@ -1,5 +1,7 @@
 # twins-kdb-fetch
+
 ## About
+
 **このプログラムでは認証が必要な`https://twins.tsukuba.ac.jp/`にはアクセスしていません。**
 
 TWINSの科目検索ページにはKdBよりもパースしやすいデータがあります。
@@ -10,7 +12,7 @@ TWINSの科目検索ページにはKdBよりもパースしやすいデータが
 ## データフォーマット
 
 ```typescript
-type Terms = { text: "春学期", code: "A" } | { text: "秋学期", code: "B" };
+type Terms = { text: "春学期"; code: "A" } | { text: "秋学期"; code: "B" };
 type DaysOfWeek = "月" | "火" | "水" | "木" | "金" | "土" | "日" | "他";
 type Periods = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 type TimeTable = {
@@ -37,16 +39,16 @@ type TwinsSubject = {
 
 type Hierarchy = { value: string | null; text: string }[];
 
-type InstructionalType = 
-    | { text: "その他", flags: { 講義: false, 演習: false, "実習･実験･実技": false, "卒業論文･卒業研究等": false, その他: true } }
-    | { text: "講義", flags: { 講義: true, 演習: false, "実習･実験･実技": false, "卒業論文･卒業研究等": false, その他: false } }
-    | { text: "演習", flags: { 講義: false, 演習: true, "実習･実験･実技": false, "卒業論文･卒業研究等": false, その他: false } }
-    | { text: "実習･実験･実技", flags: { 講義: false, 演習: false, "実習･実験･実技": true, "卒業論文･卒業研究等": false, その他: false } }
-    | { text: "講義及び演習", flags: { 講義: true, 演習: true, "実習･実験･実技": false, "卒業論文･卒業研究等": false, その他: false } }
-    | { text: "講義及び実習･実験･実技", flags: { 講義: true, 演習: false, "実習･実験･実技": true, "卒業論文･卒業研究等": false, その他: false } }
-    | { text: "演習及び実習･実験･実技", flags: { 講義: false, 演習: true, "実習･実験･実技": true, "卒業論文･卒業研究等": false, その他: false } }
-    | { text: "講義、演習及び実習･実験･実技", flags: { 講義: true, 演習: true, "実習･実験･実技": true, "卒業論文･卒業研究等": false, その他: false } }
-    | { text: "卒業論文･卒業研究等", flags: { 講義: false, 演習: false, "実習･実験･実技": false, "卒業論文･卒業研究等": true, その他: false } }
+type InstructionalType =
+    | { text: "その他"; flags: { 講義: false; 演習: false; "実習･実験･実技": false; "卒業論文･卒業研究等": false; その他: true } }
+    | { text: "講義"; flags: { 講義: true; 演習: false; "実習･実験･実技": false; "卒業論文･卒業研究等": false; その他: false } }
+    | { text: "演習"; flags: { 講義: false; 演習: true; "実習･実験･実技": false; "卒業論文･卒業研究等": false; その他: false } }
+    | { text: "実習･実験･実技"; flags: { 講義: false; 演習: false; "実習･実験･実技": true; "卒業論文･卒業研究等": false; その他: false } }
+    | { text: "講義及び演習"; flags: { 講義: true; 演習: true; "実習･実験･実技": false; "卒業論文･卒業研究等": false; その他: false } }
+    | { text: "講義及び実習･実験･実技"; flags: { 講義: true; 演習: false; "実習･実験･実技": true; "卒業論文･卒業研究等": false; その他: false } }
+    | { text: "演習及び実習･実験･実技"; flags: { 講義: false; 演習: true; "実習･実験･実技": true; "卒業論文･卒業研究等": false; その他: false } }
+    | { text: "講義、演習及び実習･実験･実技"; flags: { 講義: true; 演習: true; "実習･実験･実技": true; "卒業論文･卒業研究等": false; その他: false } }
+    | { text: "卒業論文･卒業研究等"; flags: { 講義: false; 演習: false; "実習･実験･実技": false; "卒業論文･卒業研究等": true; その他: false } };
 
 type SubjectRecord = {
     courseNumber: string; // 科目番号
@@ -77,9 +79,9 @@ type SubjectRecord = {
     parentCourseName: string; // 要件科目名
     dataUpdateDate: string; // データ更新日
     hierarchy: Hierarchy[];
-}
+};
 
-type SubjectRecordWithHierarchy = SubjectRecord & { hierarchy: Hierarchy[]; };
+type SubjectRecordWithHierarchy = SubjectRecord & { hierarchy: Hierarchy[] };
 
 type MergedSubject = {
     code: string;
@@ -111,12 +113,10 @@ type MergedSubject = {
         weekdayAndPeriod: string | null;
         moduleTimeTable: ModuleTimeTable | null;
 
-        twinsRaw:
-            | {
-                  term: string;
-                  module: string;
-              }
-            | null;
+        twinsRaw: {
+            term: string;
+            module: string;
+        } | null;
     };
     classroom: null;
     instructor: {
@@ -139,12 +139,10 @@ type MergedSubject = {
         name: string | null;
         code: string | null;
 
-        twinsRaw:
-            | {
-                  name: string;
-                  code: string;
-              }
-            | null;
+        twinsRaw: {
+            name: string;
+            code: string;
+        } | null;
     };
 
     kdbDataUpdateDate: string | null;
@@ -165,7 +163,7 @@ type SubCategoryNode = {
     children: SubjectNode[];
 };
 
-type TreeNode = 
+type TreeNode =
     | {
           type: "internal";
           node: Hierarchy;
@@ -179,6 +177,7 @@ type TreeNode =
 ```
 
 ### output/subjects.merged.json
+
 [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.merged.json)
 
 全てを合わせたデータ
@@ -186,6 +185,7 @@ type TreeNode =
 型: `MergedSubject[]`
 
 ### output/tree.kdb.json
+
 [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/tree.kdb.json)
 
 KdBから取得した木構造のデータ
@@ -193,6 +193,7 @@ KdBから取得した木構造のデータ
 型: `TreeNode[]`
 
 ### output/subjects.flat.kdb.json
+
 [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.flat.kdb.json)
 
 KdBから取得した木構造のデータをフラットにしたもの
@@ -200,11 +201,13 @@ KdBから取得した木構造のデータをフラットにしたもの
 型: `SubjectRecordWithHierarchy[]`
 
 ### output/hierarchy.kdb.txt
+
 [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/hierarchy.kdb.txt)
 
 KdBのhierarchyのデータをテキストで読めるもの
 
 ### output/subjects.twins.json
+
 [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.twins.json)
 
 TWINSから持ってきたデータ
@@ -212,11 +215,13 @@ TWINSから持ってきたデータ
 型: `TwinsSubject[]`
 
 ### output/irregularSubjects.txt
+
 [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/irregularSubjects.txt)
 
 TWINSとKdBで異なるデータ
 
 ## 最新のデータをダウンロードするスクリプト
+
 以下のスクリプトを実行すると、最新の科目データを`src/content/subjects.merged.json`にダウンロードします。
 
 ```bash
@@ -226,6 +231,7 @@ curl -Lo src/content/subjects.merged.json "https://github.com/until-tsukuba/twin
 ```
 
 ## 導入
+
 ```sh
 $ git clone https://github.com/until-tsukuba/twins-kdb-fetch.git && npm ci
 ```

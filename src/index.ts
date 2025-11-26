@@ -5,7 +5,7 @@ import { ModuleTimeTable, Terms } from "./parser/buildTwinsSubjectList";
 import { getTwinsData } from "./twins.js";
 import { InstructionalType } from "./util/instructionalType";
 import { Hierarchy } from "./util/types.js";
-import { outputReplacer } from './util/jsonReplacer.js';
+import { outputReplacer } from "./util/jsonReplacer.js";
 
 type MergedSubject = {
     code: string;
@@ -205,7 +205,7 @@ const main = async () => {
                 value: choose(
                     twinsSubject?.instructors,
                     kdbFlatSubject?.instructor.split(/[,、，]/).map((s) => s.trim()),
-                    arrayShallowEqual
+                    arrayShallowEqual,
                 ),
                 kdbRaw: kdbFlatSubject?.instructor ?? null,
                 twinsRaw: twinsSubject?.raw[4] ?? null,
@@ -238,15 +238,7 @@ const main = async () => {
         };
     });
 
-    await writeFile(
-        "output/subjects.merged.json",
-        JSON.stringify(
-            mergedSubjects,
-            outputReplacer,
-            4
-        ),
-        "utf8"
-    );
+    await writeFile("output/subjects.merged.json", JSON.stringify(mergedSubjects, outputReplacer, 4), "utf8");
 
     await writeFile("output/irregularSubjects.txt", irregularSubjects.map((v) => `${v.key}: ${v.reason}`).join("\n"), "utf8");
 };

@@ -30,7 +30,7 @@ const getNextHierarchy = async (flow: FlowType, hierarchy: Hierarchy) => {
 const getNextHierarchyWithCache = cache(
     (_flow: FlowType, hierarchy: Hierarchy) => `${hierarchy.serialize()}.children.json`,
     (flow: FlowType, hierarchy: Hierarchy) => getNextHierarchy(flow, hierarchy),
-    JSONSerializer()
+    JSONSerializer(),
 );
 
 const getSubjectRecords = async (flow: FlowType, hierarchy: Hierarchy) => {
@@ -49,7 +49,7 @@ const getSubjectRecords = async (flow: FlowType, hierarchy: Hierarchy) => {
 const getSubjectRecordsWithCache = cache(
     (_flow: FlowType, hierarchy: Hierarchy) => `${hierarchy.serialize()}.subjects.json`,
     (flow: FlowType, hierarchy: Hierarchy) => getSubjectRecords(flow, hierarchy),
-    JSONSerializer()
+    JSONSerializer(),
 );
 const mutableFlow = (init: FlowType) => {
     let currentFlow = init;
@@ -75,7 +75,7 @@ export const getKdbTreeData = async () => {
         },
         async (node) => {
             return await getSubjectRecordsWithCache(flow.getCurrentFlow(), node);
-        }
+        },
     );
 
     const subjectsFlatList = createFlatList(tree);
