@@ -1,14 +1,7 @@
 // .prettierrc.mjs
 /** @type {import("prettier").Config} */
 export default {
-    plugins: ["prettier-plugin-astro"],
-    overrides: [
-        {
-            files: "*.astro",
-            options: {
-                parser: "astro",
-                printWidth: 150,
-            },
-        },
-    ],
+    useTabs: false,
+    tabWidth: 4,
+    printWidth: 240,
 };

@@ -1,4 +1,4 @@
-import { ParsedHierarchyType, ParsedTwinsTableType } from './types';
+import { ParsedHierarchyType, ParsedTwinsTableType } from "./types";
 
 declare module "unified" {
     interface CompileResultMap {

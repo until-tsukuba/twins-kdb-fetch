@@ -42,7 +42,7 @@ const parseLine = (line: string, i: number, fileName?: string) => {
 export const getSubjectsRecord = (csvStr: string, fileName?: string): ParsedKdbTableType => {
     const lines = csvStr.split("\n");
     if (lines.length === 3) {
-        console.log(`* no subject in file: ${fileName || 'unknown'}`);
+        console.log(`* no subject in file: ${fileName || "unknown"}`);
         return [];
     }
     if (lines.length < 3) {

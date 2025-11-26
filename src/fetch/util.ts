@@ -6,7 +6,7 @@ export const parseCookie = (cookies: string[]): CookieType | null => {
         cookies.map((c) => {
             const p = c.split(";")[0]?.trim().split("=");
             return [p?.[0] ?? "", p?.[1] ?? ""];
-        })
+        }),
     );
 
     const JSESSIONID = map.get("JSESSIONID");
