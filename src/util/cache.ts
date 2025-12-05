@@ -24,7 +24,7 @@ export const emptySerializer: Serializer<string> = {
     },
 };
 
-const useCache = true; // Set to false to disable cache for debugging
+const useCache = false; // Set to false to disable cache for debugging
 
 export const cache =
     <P extends unknown[], R>(cacheKeyFunc: (...props: P) => string, calc: (...props: P) => Promise<R>, serializer: Serializer<R>): ((...props: P) => Promise<R>) =>
