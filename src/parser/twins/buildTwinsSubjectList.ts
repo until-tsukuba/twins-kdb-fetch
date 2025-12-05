@@ -9,6 +9,7 @@ const twinsHeader = [
     { key: "instructor", text: "担当" },
     { key: "affiliation", text: "開設所属" },
     { key: "year", text: "標準履修年次" },
+    { key: "syllabus", text: "シラバス" },
 ] as const;
 
 const terms = [

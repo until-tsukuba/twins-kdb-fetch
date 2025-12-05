@@ -1,17 +1,17 @@
-import { Hierarchy } from "../util/types";
+import { Requisite } from "../util/types";
 import { DfsTreeNode } from "./dfs";
 import { LeafResultNode } from "./types";
 import { visitTree } from "./visitTree.js";
 
-export const createTreeText = (tree: DfsTreeNode<Hierarchy, LeafResultNode[]>) => {
+export const createTreeText = (tree: DfsTreeNode<Requisite, LeafResultNode[]>) => {
     const subjectCategoryTextLines: string[] = [];
-    visitTree<DfsTreeNode<Hierarchy, LeafResultNode[]> | LeafResultNode>(tree, (node) => {
-        if (node.type === "internal" || node.type === "leaf" || node.type === "sub_category") {
-            if (node.node.getLength() === 0) {
+    visitTree<DfsTreeNode<Requisite, LeafResultNode[]> | LeafResultNode>(tree, (node, depth) => {
+        if (node.type === "internal" || node.type === "leaf") {
+            if (depth === 0) {
                 // root node, skip
                 return;
             }
-            subjectCategoryTextLines.push("    ".repeat(node.node.getLength() - 1) + (node.node.getLast()?.text ?? "root"));
+            subjectCategoryTextLines.push("    ".repeat(depth - 1) + (node.node.getName() ?? "root"));
         } else if (node.type === "subject") {
             // skip
         }

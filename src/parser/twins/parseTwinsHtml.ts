@@ -1,6 +1,6 @@
 import { Element } from "hast";
-import { generateHtmlParser, isAnchor, isElement, isText } from "./util.js";
-import { ParsedTwinsTableType } from "./types";
+import { generateHtmlParser, isAnchor, isElement, isText } from "../util.js";
+import { ParsedTwinsTableType } from "./types.js";
 
 const isMainTable = (node: Element) => {
     return node.tagName === "table" && Array.isArray(node.properties.className) && node.properties.className[0] === "normal";

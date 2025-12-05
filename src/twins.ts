@@ -1,15 +1,16 @@
 import { writeFile } from "fs/promises";
 import endpoints from "./fetch/endpoints.js";
-import { parseTwinsHtml } from "./parser/parseTwinsHtml.js";
-import { buildTwinsSubjectList } from "./parser/buildTwinsSubjectList.js";
+import { parseTwinsHtml } from "./parser/twins/parseTwinsHtml.js";
+import { buildTwinsSubjectList } from "./parser/twins/buildTwinsSubjectList.js";
 
 export const getTwinsData = async () => {
-    const loginFlow = await endpoints.twins.login();
-    const initialFlow = await endpoints.twins.init(loginFlow);
-    const inputFlow = await endpoints.twins.subjectInput(initialFlow);
+    const initialFlow = await endpoints.twins.init();
+    const loginFlow = await endpoints.twins.login(initialFlow);
+    const rswFlow = await endpoints.twins.rsw(loginFlow);
+    const inputFlow = await endpoints.twins.subjectInput(rswFlow);
     const jikanwariFlow = await endpoints.twins.jikanwariSearch(inputFlow);
     const red = await endpoints.twins.searchTwins(jikanwariFlow, "");
-    const htmlBody = await endpoints.getContent(red, "utf8");
+    const htmlBody = await endpoints.twins.getContent(red, "utf8");
     const table = await parseTwinsHtml(htmlBody);
 
     const twinsData = buildTwinsSubjectList(table);
@@ -17,5 +18,3 @@ export const getTwinsData = async () => {
 
     return twinsData;
 };
-
-// getTwinsData();

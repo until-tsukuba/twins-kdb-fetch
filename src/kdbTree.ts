@@ -1,11 +1,6 @@
 import { writeFile } from "node:fs/promises";
 
-import endpoints from "./fetch/endpoints.js";
-import { FlowType } from "./fetch/types.js";
-
-import { getSubjectsRecord } from "./parser/parseCsv.js";
-import { parseKdbHtml } from "./parser/parseKdbTwins.js";
-import { buildKdbSubCategories } from "./parser/buildKdbSubCategories.js";
+import type { KdBFlowType } from "./fetch/kdb/types.js";
 
 import { dfs } from "./tree/dfs.js";
 import { LeafResultNode } from "./tree/types.js";
@@ -13,68 +8,36 @@ import { createLeafResultNode } from "./tree/createNode.js";
 import { createFlatList } from "./tree/createFlatList.js";
 import { createTreeText } from "./tree/createTreeText.js";
 
-import { cache, JSONSerializer } from "./util/cache.js";
-import { Hierarchy } from "./util/types.js";
 import { outputReplacer } from "./util/jsonReplacer.js";
+import { getChildRequisiteWithCache, getKdbInitFlow, getSubjectRecordsWithCache } from "./helper/kdb/subjects.js";
+import { Requisite } from "./util/types.js";
 
-const getNextHierarchy = async (flow: FlowType, hierarchy: Hierarchy) => {
-    const newFlow = await endpoints.kdb.changeHierarchy(flow, Math.max(hierarchy.getLength(), 1), hierarchy);
-    const html = await endpoints.getContent(newFlow, "utf8");
-    const hierarchySelectors = await parseKdbHtml(html);
+const getNextHierarchy = async (flow: KdBFlowType, requisite: Requisite) => {
+    const children = await getChildRequisiteWithCache(flow, requisite);
 
-    const choices = hierarchySelectors[hierarchy.getLength()] ?? [];
-    const children = hierarchy.genChildren(choices);
-    return { newFlow, children };
+    return children;
 };
 
-const getNextHierarchyWithCache = cache(
-    (_flow: FlowType, hierarchy: Hierarchy) => `${hierarchy.serialize()}.children.json`,
-    (flow: FlowType, hierarchy: Hierarchy) => getNextHierarchy(flow, hierarchy),
-    JSONSerializer(),
-);
+const getSubjectRecordTree = async (flow: KdBFlowType, requisite: Requisite) => {
+    const kdbSubjectRecords = await getSubjectRecordsWithCache(flow, requisite);
 
-const getSubjectRecords = async (flow: FlowType, hierarchy: Hierarchy) => {
-    const newFlow = await endpoints.kdb.searchSubject(flow, hierarchy);
-    const downloadFlow = await endpoints.kdb.outputCsv(newFlow, hierarchy);
-    const csv = await endpoints.getContent(downloadFlow, "shift-jis");
-
-    const categories = getSubjectsRecord(csv, `${hierarchy.serialize()}.subjects.json`);
-
-    const subCategories = buildKdbSubCategories(categories);
-    const subjects = createLeafResultNode(hierarchy, subCategories);
+    const subjects = createLeafResultNode(kdbSubjectRecords);
 
     return subjects;
 };
 
-const getSubjectRecordsWithCache = cache(
-    (_flow: FlowType, hierarchy: Hierarchy) => `${hierarchy.serialize()}.subjects.json`,
-    (flow: FlowType, hierarchy: Hierarchy) => getSubjectRecords(flow, hierarchy),
-    JSONSerializer(),
-);
-const mutableFlow = (init: FlowType) => {
-    let currentFlow = init;
-    return {
-        getCurrentFlow() {
-            return currentFlow;
-        },
-        setFlow(flow: FlowType) {
-            currentFlow = flow;
-        },
-    };
-};
-
 export const getKdbTreeData = async () => {
-    const flow = mutableFlow(await endpoints.kdb.init());
+    const flow = await getKdbInitFlow();
 
-    const tree = await dfs<Hierarchy, LeafResultNode[]>(
-        Hierarchy.root,
+    const tree = await dfs<Requisite, LeafResultNode[]>(
+        Requisite.root,
         async (node) => {
-            const { newFlow, children } = await getNextHierarchyWithCache(flow.getCurrentFlow(), node);
-            flow.setFlow(newFlow);
-            return children;
+            console.log(`Processing getNext hierarchy node: ${node.serialize()}`);
+            return await getNextHierarchy(flow, node);
         },
         async (node) => {
-            return await getSubjectRecordsWithCache(flow.getCurrentFlow(), node);
+            console.log(`Processing getSubjectRecords hierarchy node: ${node.serialize()}`);
+            return await getSubjectRecordTree(flow, node);
         },
     );
 

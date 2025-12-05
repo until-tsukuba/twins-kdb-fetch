@@ -1,7 +1,7 @@
 import { unified } from "unified";
-import { CompileResults, Node, Plugin, Processor } from "unified/lib";
+import type { CompileResults, Node, Plugin, Processor } from "unified/lib";
 import { visit } from "unist-util-visit";
-import { Element, ElementContent, Text } from "hast";
+import type { Element, ElementContent, Text } from "hast";
 import rehypeParse from "rehype-parse";
 
 export const isElement = (node: Node | ElementContent): node is Element => {

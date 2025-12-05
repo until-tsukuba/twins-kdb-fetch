@@ -1,38 +1,100 @@
-export type HierarchyType = { value: string | null; text: string }[];
+import { ParsedRequisiteType } from "../parser/kdb/types";
 
-export class Hierarchy {
-    private hierarchy: HierarchyType;
+// export type HierarchyType = {
+//     value: string;
+//     text: string;
+//     hasLower: boolean;
+// }[];
 
-    constructor(hierarchy: HierarchyType) {
-        this.hierarchy = hierarchy;
+// export class Hierarchy {
+//     private hierarchy: HierarchyType;
+
+//     constructor(hierarchy: HierarchyType) {
+//         this.hierarchy = hierarchy;
+//     }
+//     getHierarchyIds(): string[] {
+//         return this.hierarchy.map((h) => h.value);
+//     }
+//     serialize(): string {
+//         return this.getHierarchyIds().join("_");
+//     }
+//     getLength(): number {
+//         return this.hierarchy.length;
+//     }
+//     pushed(value: string, text: string, hasLower: boolean): Hierarchy {
+//         return new Hierarchy([...this.hierarchy, { value, text, hasLower }]);
+//     }
+//     getLast(): { value: string; text: string; hasLower: boolean } | null {
+//         return this.hierarchy[this.hierarchy.length - 1] ?? null;
+//     }
+
+//     genChildren(choices: ParsedRequisiteType): Hierarchy[] {
+//         return choices.map((choice) => this.pushed(choice.id, choice.name, choice.hasLower));
+//     }
+//     static root = new Hierarchy([]);
+//     toCacheJSON() {
+//         return { type: "hierarchy", hierarchy: this.hierarchy };
+//     }
+//     static fromCacheJSON(value: { type: "hierarchy"; hierarchy: HierarchyType }) {
+//         return new Hierarchy(value.hierarchy);
+//     }
+//     toOutputJSON() {
+//         return this.hierarchy;
+//     }
+// }
+
+export type RequisiteType = {
+    id: string;
+    name: string;
+    hasLower: boolean;
+} | null;
+
+export class Requisite {
+    private requisite: RequisiteType;
+
+    constructor(requisite: RequisiteType) {
+        this.requisite = requisite;
     }
-    getHierarchyIds(): (string | null)[] {
-        return this.hierarchy.map((h) => h.value);
+
+    getId(): string | null {
+        return this.requisite?.id ?? null;
+    }
+
+    getName(): string | null {
+        return this.requisite?.name ?? null;
+    }
+
+    getHasLower(): boolean | null {
+        return this.requisite?.hasLower ?? null;
     }
     serialize(): string {
-        return this.getHierarchyIds().join("_");
-    }
-    getLength(): number {
-        return this.hierarchy.length;
-    }
-    pushed(value: string | null, text: string): Hierarchy {
-        return new Hierarchy([...this.hierarchy, { value, text }]);
-    }
-    getLast(): { value: string | null; text: string } | null {
-        return this.hierarchy[this.hierarchy.length - 1] ?? null;
+        return this.getId() ?? "root";
     }
 
-    genChildren(choices: { value: string | null; text: string }[]): Hierarchy[] {
-        return choices.map((choice) => this.pushed(choice.value, choice.text));
+    equals(other: unknown): boolean {
+        if (!(other instanceof Requisite)) {
+            return false;
+        }
+        return this.getId() === other.getId();
     }
-    static root = new Hierarchy([]);
+
+    static root = new Requisite(null);
+    static genMultiple(requisites: ParsedRequisiteType): Requisite[] {
+        return requisites.map((req) => new Requisite(req));
+    }
+
     toCacheJSON() {
-        return { type: "hierarchy", hierarchy: this.hierarchy };
+        return { type: "requisite", requisite: this.requisite };
     }
-    static fromCacheJSON(value: { type: "hierarchy"; hierarchy: HierarchyType }) {
-        return new Hierarchy(value.hierarchy);
+
+    static fromCacheJSON(value: { type: "requisite"; requisite: RequisiteType }) {
+        return new Requisite(value.requisite);
     }
+
     toOutputJSON() {
-        return this.hierarchy;
+        return this.requisite;
+    }
+    toString(): string {
+        return `Requisite(${this.serialize()})`;
     }
 }
