@@ -58,4 +58,4 @@ export const generateKdBSubjectOverviewForm = (subjectId: string) => {
         txtSubcourse: "0",
     });
     return form;
-}
+};

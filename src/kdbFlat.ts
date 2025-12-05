@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 
 import { getKdbInitFlow, getSubjectRecordsWithCache } from "./helper/kdb/subjects.js";
-import { Requisite } from './util/types.js';
+import { Requisite } from "./util/types.js";
 
 export const getKdbFlatData = async () => {
     const basicFlow = await getKdbInitFlow();

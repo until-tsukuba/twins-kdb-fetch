@@ -15,7 +15,7 @@ export const createFlatList = (tree: DfsTreeNode<Requisite, LeafResultNode[]>) =
         if (node.type === "subject") {
             const existing = subjectsFlatMap.get(node.subject.courseCode);
             const newRequisite = [...(existing?.requisite ?? [])];
-            if (parent && newRequisite.every((r)  => !r.equals(parent.node))) {
+            if (parent && newRequisite.every((r) => !r.equals(parent.node))) {
                 newRequisite.push(parent.node);
             }
 

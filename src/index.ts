@@ -8,12 +8,13 @@ import { Requisite } from "./util/types.js";
 import { outputReplacer } from "./util/jsonReplacer.js";
 
 type MergedSubject = {
-    code: string;
-    name: string;
+    code: string; // 科目番号
+    name: string; // 科目名
+    syllabusLatestLink: string | null; // シラバス最新リンク
     instructionalType: {
         value: InstructionalType | null;
         kdbRaw: string | null;
-    };
+    }; // 授業方法
     credits: {
         value:
             | {
@@ -25,39 +26,34 @@ type MergedSubject = {
               }
             | null;
         kdbRaw: string | null;
-    };
+    }; // 単位数
     year: {
         value: number[];
         kdbRaw: string | null;
         twinsRaw: string | null;
-    };
+    }; // 標準履修年次
     terms: {
-        term: Terms | null;
-        module: string | null;
-        weekdayAndPeriod: string | null;
-        moduleTimeTable: ModuleTimeTable | null;
+        term: Terms | null; // 学期
+        module: string | null; // 実施学期
+        weekdayAndPeriod: string | null; // 曜時限
+        moduleTimeTable: ModuleTimeTable | null; // モジュール時間割
 
         twinsRaw: {
             term: string;
             module: string;
         } | null;
     };
-    classroom: null;
+    classroom: null; // 教室
     instructor: {
         value: string[];
 
         kdbRaw: string | null;
         twinsRaw: string | null;
-    };
-    overview: string | null;
-    remarks: string | null;
-    auditor: string | null;
-    conditionsForAuditors: string | null;
-    exchangeStudent: string | null;
-    conditionsForExchangeStudents: string | null;
-    JaEnCourseName: string | null;
-    parentNumber: string | null;
-    parentCourseName: string | null;
+    }; // 担当教員
+    overview: string | null; // 授業概要
+    remarks: string | null; // 備考
+    auditor: string | null; // 科目等履修生申請可否
+    conditionsForAuditors: string | null; // 申請条件
 
     affiliation: {
         name: string | null;
@@ -68,8 +64,6 @@ type MergedSubject = {
             code: string;
         } | null;
     };
-
-    kdbDataUpdateDate: string | null;
 
     requisite: Requisite[];
 };
