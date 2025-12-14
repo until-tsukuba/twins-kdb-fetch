@@ -1,4 +1,4 @@
-import { ParsedTwinsTableType } from "./types";
+import { ParsedTwinsTableType } from "./types.js";
 
 const twinsHeader = [
     { key: null, text: "No." },
@@ -46,19 +46,6 @@ export type TwinsSubject = {
 
     raw: [term: string, module: string, code: string, title: { text: string; onclick: string }, instructor: string, affiliation: string, year: string];
 };
-
-/*
-type ParsedTwinsTableType = {
-    head: (string | {
-        text: string;
-        onclick: string;
-    })[];
-    body: (string | {
-        text: string;
-        onclick: string;
-    })[][];
-}
-*/
 
 const assertValidHeader = (header: ParsedTwinsTableType["head"]) => {
     if (header.length !== twinsHeader.length) {

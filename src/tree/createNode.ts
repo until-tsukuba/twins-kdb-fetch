@@ -1,6 +1,6 @@
-import { KdbSubjectRecord } from "../parser/kdb/types";
-import { Requisite } from "../util/types";
-import { LeafResultNode, SubjectNode } from "./types";
+import { KdbSubjectRecord } from "../parser/kdb/types.js";
+import { Requisite } from "../util/requisite.js";
+import { SubjectNode } from "./types.js";
 
 const createSubjectNode = (subject: KdbSubjectRecord): SubjectNode => {
     const selfNode = new Requisite({ id: subject.courseCode, name: subject.courseName, hasLower: false });
@@ -12,12 +12,8 @@ const createSubjectNode = (subject: KdbSubjectRecord): SubjectNode => {
     };
 };
 
-const createSubjectNodeList = (subjects: KdbSubjectRecord[]): SubjectNode[] => {
+export const createSubjectNodeList = (subjects: KdbSubjectRecord[]): SubjectNode[] => {
     return subjects.map((subj) => {
         return createSubjectNode(subj);
     });
-};
-
-export const createLeafResultNode = (categories: KdbSubjectRecord[]): LeafResultNode[] => {
-    return createSubjectNodeList(categories);
 };

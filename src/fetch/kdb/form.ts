@@ -1,4 +1,4 @@
-import { year } from "../../envs";
+import { year } from "../../envs.js";
 
 export const generateKdBFirstRequisitesForm = () => {
     const form = new URLSearchParams({
@@ -25,37 +25,32 @@ export const generateKdBLowerRequisitesForm = (requisiteCode: string) => {
     return form;
 };
 
-export const generateKdBSearchForm = (requisiteCode: string, page: number) => {
+export const generateKdBCsvDownloadForm = (requisiteCode: string) => {
     const form = new URLSearchParams({
         pageId: "SB0070",
-        action: "search",
-        txtFy: year,
-        cmbTerm: "",
-        cmbDay: "",
-        cmbPeriod: "",
+        action: "downloadList",
+        hdnFy: year,
+        hdnTermCode: "",
+        hdnDayCode: "",
+        hdnPeriodCode: "",
+        hdnAgentName: "",
         hdnOrg: "",
-        hdnReq: requisiteCode, // requisite
+        hdnIsManager: "",
+        hdnReq: requisiteCode,
         hdnFac: "",
         hdnDepth: "",
-        chkSyllabi: "false",
-        chkAuditor: "false",
-        chkExchangeStudent: "false",
-        chkConductedInEnglish: "false",
-        txtSyllabus: "", // search keyword
-        appendSchedule: "",
-        page: "" + page,
-        total: "-1",
-    });
-    return form;
-};
-
-export const generateKdBSubjectOverviewForm = (subjectId: string) => {
-    const form = new URLSearchParams({
-        pageId: "SB0070",
-        action: "searchContents",
-        txtFy: "2025",
-        txtCourse: subjectId,
-        txtSubcourse: "0",
+        hdnChkSyllabi: "false",
+        hdnChkAuditor: "false",
+        hdnChkExchangeStudent: "false",
+        hdnChkConductedInEnglish: "false",
+        hdnCourse: "",
+        hdnKeywords: "",
+        hdnFullname: "",
+        hdnDispDay: "",
+        hdnDispPeriod: "",
+        hdnOrgName: "",
+        hdnReqName: "SSAAAA",
+        cmbDwldtype: "csv",
     });
     return form;
 };

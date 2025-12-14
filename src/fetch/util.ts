@@ -1,4 +1,4 @@
-import { CookieType } from "./types";
+import { CookieType } from "./types.js";
 
 export const parseCookie = (cookies: string[]): CookieType | null => {
     const map = new Map(

@@ -67,58 +67,11 @@
  *   },
  * ]
  * ```
- *
- *
  */
 
-import { Element, ElementContent, Text } from "hast";
-import { generateHtmlParser } from "../util";
-import { ParsedRequisiteType } from "./types";
-
-const isElement = (node: ElementContent): node is Element => {
-    return node.type === "element";
-};
-
-const assertChildElementLength = (node: Element, expected: number) => {
-    if (node.children.filter(isElement).length !== expected) {
-        throw new Error(`Invalid children length: expected ${expected}, got ${node.children.length}`);
-    }
-};
-
-const assertChildrenLength = (node: Element, expected: number) => {
-    if (node.children.length !== expected) {
-        throw new Error(`Invalid children length: expected ${expected}, got ${node.children.length}`);
-    }
-};
-
-function assertElementTag(node: ElementContent | undefined, expectedTag: string): asserts node is Element {
-    if (!node || node.type !== "element") {
-        throw new Error(`Invalid element: expected ${expectedTag}, got ${node?.type}`);
-    }
-    if (node.tagName !== expectedTag) {
-        throw new Error(`Invalid element tag: expected ${expectedTag}, got ${node.tagName}`);
-    }
-}
-
-const compareArray = <T>(a: T[], b: T[]): boolean => {
-    if (a.length !== b.length) {
-        return false;
-    }
-    return a.every((value, index) => value === b[index]);
-};
-
-const assertElementClass = (node: Element, expectedClass: string[]) => {
-    const className = node.properties.className;
-    if (!className || !Array.isArray(className) || !compareArray(className, expectedClass)) {
-        throw new Error(`Invalid element class: expected ${expectedClass.join(" ")}, got ${className}`);
-    }
-};
-
-function assertTextNode(node: ElementContent | undefined): asserts node is Text {
-    if (!node || node.type !== "text") {
-        throw new Error(`Invalid text node: expected text, got ${node?.type}`);
-    }
-}
+import { Element } from "hast";
+import { assertChildElementLength, assertChildrenLength, assertElementClass, assertElementTag, assertTextNode, generateHtmlParser, isElement } from "../util.js";
+import { ParsedRequisiteType } from "./types.js";
 
 const isRequisiteLi = (node: Element) => {
     if (node.tagName !== "li") {

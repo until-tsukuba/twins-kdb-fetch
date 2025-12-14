@@ -1,9 +1,21 @@
 import { Element } from "hast";
-import { generateHtmlParser, isAnchor, isElement, isText } from "../util.js";
+import { assertChildElementLength, assertChildrenLength, assertElementTag, assertTextNode, generateHtmlParser, isElement } from "../util.js";
 import { ParsedTwinsTableType } from "./types.js";
 
 const isMainTable = (node: Element) => {
-    return node.tagName === "table" && Array.isArray(node.properties.className) && node.properties.className[0] === "normal";
+    if (node.tagName !== "table") {
+        return false;
+    }
+    if (!Array.isArray(node.properties.className)) {
+        return false;
+    }
+    if (node.properties.className.length === 0) {
+        return false;
+    }
+    if (node.properties.className[0] !== "normal") {
+        return false;
+    }
+    return true;
 };
 
 export const parseTwinsHtml = generateHtmlParser<ParsedTwinsTableType>(isMainTable, (mainTableList) => {
@@ -15,42 +27,36 @@ export const parseTwinsHtml = generateHtmlParser<ParsedTwinsTableType>(isMainTab
         throw new Error("Multiple main tables found in the HTML.");
     }
 
+    assertChildElementLength(mainTable, 2);
+
     const thead = mainTable.children.filter(isElement)[0];
-    if (!thead || thead.tagName !== "thead") {
-        throw new Error("The first child of the main table is not a <thead> element.");
-    }
+    assertElementTag(thead, "thead");
+
     const tbody = mainTable.children.filter(isElement)[1];
-    if (!tbody || tbody.tagName !== "tbody") {
-        throw new Error("The second child of the main table is not a <tbody> element.");
-    }
+    assertElementTag(tbody, "tbody");
+
     const trToStringList = (row: Element | undefined) => {
-        if (!row || row.tagName !== "tr") {
-            throw new Error("The children of the <tbody> or <thead> must be <tr> elements.");
-        }
+        assertElementTag(row, "tr");
         return row.children.filter(isElement).map((cell) => {
             if (cell.tagName !== "th" && cell.tagName !== "td") {
                 throw new Error("The <tr> elements must contain <th> or <td> elements.");
             }
             if (cell.children.length === 1) {
                 const childNode = cell.children[0];
-                if (!childNode || !isText(childNode)) {
-                    throw new Error("The <th> or <td> elements must contain a text node or an <a> element.");
-                }
+                assertTextNode(childNode);
                 return childNode.value.trim();
             } else {
                 const childNode = cell.children.filter(isElement)[0];
-                if (!childNode || !isAnchor(childNode)) {
-                    throw new Error("The <th> or <td> elements must contain a text node or an <a> element.");
-                }
+                assertElementTag(childNode, "a");
                 const onclick = childNode.properties.onClick;
                 if (typeof onclick !== "string") {
                     console.error("childNode", childNode);
                     throw new Error("The <a> element must have an onClick property.");
                 }
+                assertChildrenLength(childNode, 1);
                 const text = childNode.children[0];
-                if (!text || !isText(text)) {
-                    throw new Error("The <a> element must contain a text node.");
-                }
+                assertTextNode(text);
+
                 return {
                     text: text.value.trim(),
                     onclick: onclick,

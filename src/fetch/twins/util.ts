@@ -1,5 +1,5 @@
-import { assertCookieOnlyFlow, assertNonNullableFlow } from "./flow";
-import { Res, ResArrayBuffer, ResRedirect, TwinsCookieOnlyFlowType, TwinsFlowType } from "./types";
+import { assertCookieOnlyFlow, assertNonNullableFlow } from "./flow.js";
+import { Res, ResArrayBuffer, ResRedirect, TwinsCookieOnlyFlowType, TwinsFlowType } from "./types.js";
 
 export function assertRedirect(res: Res): asserts res is ResRedirect {
     if (res.type !== "redirect") {

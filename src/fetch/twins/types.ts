@@ -1,4 +1,4 @@
-import { CookieType } from "../types";
+import { CookieType } from "../types.js";
 
 export type TwinsFlowType = {
     cookie: CookieType;

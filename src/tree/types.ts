@@ -1,5 +1,5 @@
-import { KdbSubjectRecord } from "../parser/kdb/types";
-import { Requisite } from "../util/types";
+import { KdbSubjectRecord } from "../parser/kdb/types.js";
+import { Requisite } from "../util/requisite.js";
 
 export type SubjectNode = {
     type: "subject";
@@ -8,10 +8,4 @@ export type SubjectNode = {
     children: null;
 };
 
-// export type SubCategoryNode = {
-//     type: "sub_category";
-//     node: Requisite;
-//     children: SubjectNode[];
-// };
-
-export type LeafResultNode = /*SubCategoryNode |*/ SubjectNode; // use kdb released
+// export type LeafResultNode = SubjectNode;

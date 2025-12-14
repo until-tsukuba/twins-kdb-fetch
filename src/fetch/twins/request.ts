@@ -1,5 +1,5 @@
 import { mergeCookie, parseCookie, stringifyCookie } from "../util.js";
-import { TwinsNullableFlowType, Res } from "./types";
+import { TwinsNullableFlowType, Res } from "./types.js";
 import { twinsHost } from "../../envs.js";
 
 export const req = async (path: string, flow: TwinsNullableFlowType, requestBody: URLSearchParams | null): Promise<Res> => {

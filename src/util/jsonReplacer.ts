@@ -1,4 +1,4 @@
-import { Requisite, RequisiteType } from "./types.js";
+import { Requisite, RequisiteType } from "./requisite.js";
 
 export const outputReplacer = (_key: string, value: unknown) => {
     if (typeof value === "number" && (isNaN(value) || !isFinite(value))) {

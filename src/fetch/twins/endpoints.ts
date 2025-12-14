@@ -1,4 +1,4 @@
-import { TwinsFlowType, TwinsNullableFlowType } from "./types";
+import { TwinsFlowType, TwinsNullableFlowType } from "./types.js";
 import { initialFlow } from "./flow.js";
 import { generateTwinsSearchForm, generateTwinsLoginForm } from "./form.js";
 import { req } from "./request.js";

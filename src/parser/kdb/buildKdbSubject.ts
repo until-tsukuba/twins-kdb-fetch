@@ -1,33 +1,39 @@
-import { getInstructionalType } from "../../util/instructionalType";
-import { KdbSubjectRecord, ParsedSearchResultType } from "./types";
-import { parseCredit, parseYear } from "./util";
+import { getInstructionalType } from "../../util/instructionalType.js";
+import { RawKdbSubjectRecord } from "./kdbSubjectRecord.js";
+import { KdbSubjectRecord } from "./types.js";
+import { parseCredit, parseYear } from "./util.js";
 
-export const buildKdbSubjects = (subject: ParsedSearchResultType): KdbSubjectRecord[] => {
-    return subject.map((subject) => {
+export const buildKdbSubjects = (subjects: RawKdbSubjectRecord[]): KdbSubjectRecord[] => {
+    return subjects.map((subject) => {
         return {
-            courseCode: subject.code,
-            courseName: subject.title,
-            syllabusLatestLink: subject.syllabusLatestLink,
+            courseCode: subject.courseNumber,
+            courseName: subject.courseName,
             courseType: {
-                code: subject.style,
-                ...getInstructionalType(subject.style),
+                code: subject.courseType,
+                ...getInstructionalType(subject.courseType),
             },
             credits: {
-                text: subject.credit,
-                value: parseCredit(subject.credit),
+                text: subject.credits,
+                value: parseCredit(subject.credits),
             },
             year: {
-                text: subject.grade,
-                value: parseYear(subject.grade),
+                text: subject.year,
+                value: parseYear(subject.year),
             },
             term: subject.term,
-            weekdayAndPeriod: subject.day,
+            weekdayAndPeriod: subject.weekdayAndPeriod,
             classroom: null,
-            instructor: subject.agent,
-            overview: subject.body,
-            remarks: subject.remark,
+            instructor: subject.instructor,
+            overview: subject.overview,
+            remarks: subject.remarks,
             auditor: subject.auditor,
-            conditionsForAuditors: subject.auditorReason,
+            conditionsForAuditors: subject.conditionsForAuditors,
+            exchangeStudent: subject.exchangeStudent,
+            conditionsForExchangeStudents: subject.conditionsForExchangeStudents,
+            JaEnCourseName: subject.JaEnCourseName,
+            parentNumber: subject.parentNumber,
+            parentCourseName: subject.parentCourseName,
+            dataUpdateDate: subject.dataUpdateDate,
         };
     });
 };

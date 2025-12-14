@@ -1,10 +1,10 @@
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
 import { getKdbTreeData } from "./kdbTree.js";
 import { getKdbFlatData } from "./kdbFlat.js";
-import { ModuleTimeTable, Terms } from "./parser/twins/buildTwinsSubjectList";
+import { ModuleTimeTable, Terms } from "./parser/twins/buildTwinsSubjectList.js";
 import { getTwinsData } from "./twins.js";
-import { InstructionalType } from "./util/instructionalType";
-import { Requisite } from "./util/types.js";
+import { InstructionalType } from "./util/instructionalType.js";
+import { Requisite } from "./util/requisite.js";
 import { outputReplacer } from "./util/jsonReplacer.js";
 
 type MergedSubject = {
@@ -166,7 +166,7 @@ const main = async () => {
             code: key,
             // 8310205
             name: choose(twinsSubject?.name, kdbFlatSubject?.courseName),
-            syllabusLatestLink: kdbFlatSubject?.syllabusLatestLink ?? null,
+            syllabusLatestLink: null,
             instructionalType: {
                 value: kdbFlatSubject?.courseType ?? null,
                 kdbRaw: kdbFlatSubject?.courseType.code ?? null,
@@ -209,11 +209,11 @@ const main = async () => {
             remarks: kdbFlatSubject?.remarks ?? null,
             auditor: kdbFlatSubject?.auditor ?? null,
             conditionsForAuditors: kdbFlatSubject?.conditionsForAuditors ?? null,
-            exchangeStudent: null,
-            conditionsForExchangeStudents: null,
-            JaEnCourseName: null,
-            parentNumber: null,
-            parentCourseName: null,
+            exchangeStudent: kdbFlatSubject?.exchangeStudent ?? null,
+            conditionsForExchangeStudents: kdbFlatSubject?.conditionsForExchangeStudents ?? null,
+            JaEnCourseName: kdbFlatSubject?.JaEnCourseName ?? null,
+            parentNumber: kdbFlatSubject?.parentNumber ?? null,
+            parentCourseName: kdbFlatSubject?.parentCourseName ?? null,
 
             affiliation: {
                 name: twinsSubject?.affiliation.name ?? null,
@@ -227,7 +227,7 @@ const main = async () => {
                     : null,
             },
 
-            kdbDataUpdateDate: null,
+            kdbDataUpdateDate: kdbFlatSubject?.dataUpdateDate ?? null,
 
             requisite: kdbTreeSubject?.requisite || [], // kdbTreeSubject
         };

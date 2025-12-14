@@ -1,4 +1,4 @@
-import { KdBFlowType, KdBNullableFlowType } from "./types";
+import { KdBFlowType, KdBNullableFlowType } from "./types.js";
 
 export const initialFlow: KdBNullableFlowType = { cookie: null };
 

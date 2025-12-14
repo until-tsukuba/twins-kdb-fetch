@@ -1,4 +1,4 @@
-import { writeFile } from "fs/promises";
+import { writeFile } from "node:fs/promises";
 import endpoints from "./fetch/endpoints.js";
 import { parseTwinsHtml } from "./parser/twins/parseTwinsHtml.js";
 import { buildTwinsSubjectList } from "./parser/twins/buildTwinsSubjectList.js";

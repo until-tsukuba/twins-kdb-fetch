@@ -1,6 +1,6 @@
-import { ParsedRequisiteType, ParsedSearchResultType } from "./kdb/types";
-import { ParsedTwinsTableType } from "./twins/types";
-import { ParsedHierarchyType } from "./types";
+import { ParsedRequisiteType, ParsedSearchResultType } from "./kdb/types.js";
+import { ParsedTwinsTableType } from "./twins/types.js";
+import { ParsedHierarchyType } from "./types.js";
 
 declare module "unified" {
     interface CompileResultMap {

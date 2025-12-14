@@ -57,7 +57,7 @@ type InstructionalType =
 type KdbSubjectRecord = {
     courseCode: string; // 科目番号
     courseName: string; // 科目名
-    syllabusLatestLink: string | null; // シラバス最新リンク
+    syllabusLatestLink: null; // シラバス最新リンク
     courseType: InstructionalType & {
         code: string;
     }; // 授業方法
@@ -69,14 +69,20 @@ type KdbSubjectRecord = {
         text: string;
         value: number[];
     }; // 標準履修年次
-    term: string | null; // 実施学期
-    weekdayAndPeriod: string | null; // 曜時限
-    classroom: string | null; // 教室
-    instructor: string | null; // 担当教員
-    overview: string | null; // 授業概要
+    term: string; // 実施学期
+    weekdayAndPeriod: string; // 曜時限
+    classroom: null; // 教室
+    instructor: string; // 担当教員
+    overview: string; // 授業概要
     remarks: string; // 備考
-    auditor: string | null; // 科目等履修生申請可否
-    conditionsForAuditors: string | null; // 申請条件
+    auditor: string; // 科目等履修生申請可否
+    conditionsForAuditors: string; // 申請条件
+    exchangeStudent: string; // 短期留学生申請可否
+    conditionsForExchangeStudents: string; // 申請条件
+    JaEnCourseName: string; // 英語(日本語)科目名
+    parentNumber: string; // 科目コード
+    parentCourseName: string; // 要件科目名
+    dataUpdateDate: string; // データ更新日
 };
 
 type KdbSubjectRecordWithRequisite = KdbSubjectRecord & { requisite: Requisite[] };
@@ -128,6 +134,11 @@ type MergedSubject = {
     remarks: string | null; // 備考
     auditor: string | null; // 科目等履修生申請可否
     conditionsForAuditors: string | null; // 申請条件
+    exchangeStudent: string ?? null,
+    conditionsForExchangeStudents: string ?? null, // 申請条件
+    JaEnCourseName: string ?? null, // 英語(日本語)科目名
+    parentNumber: string ?? null, // 科目コード
+    parentCourseName: string ?? null, // 要件科目名
 
     affiliation: {
         name: string | null;

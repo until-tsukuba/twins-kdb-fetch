@@ -1,4 +1,4 @@
-import { TwinsFlowType, TwinsNullableFlowType, TwinsCookieOnlyFlowType } from "./types";
+import { TwinsFlowType, TwinsNullableFlowType, TwinsCookieOnlyFlowType } from "./types.js";
 
 export const initialFlow: TwinsNullableFlowType = { flowExecutionKey: null, cookie: null };
 

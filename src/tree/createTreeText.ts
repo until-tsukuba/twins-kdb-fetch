@@ -1,11 +1,11 @@
-import { Requisite } from "../util/types";
-import { DfsTreeNode } from "./dfs";
-import { LeafResultNode } from "./types";
+import { Requisite } from "../util/requisite.js";
+import { DfsTreeNode } from "./dfs.js";
+import { SubjectNode } from "./types.js";
 import { visitTree } from "./visitTree.js";
 
-export const createTreeText = (tree: DfsTreeNode<Requisite, LeafResultNode[]>) => {
+export const createTreeText = (tree: DfsTreeNode<Requisite, SubjectNode[]>) => {
     const subjectCategoryTextLines: string[] = [];
-    visitTree<DfsTreeNode<Requisite, LeafResultNode[]> | LeafResultNode>(tree, (node, depth) => {
+    visitTree<DfsTreeNode<Requisite, SubjectNode[]> | SubjectNode>(tree, (node, depth) => {
         if (node.type === "internal" || node.type === "leaf") {
             if (depth === 0) {
                 // root node, skip

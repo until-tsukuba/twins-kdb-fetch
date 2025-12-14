@@ -1,4 +1,4 @@
-import { CookieType } from "../types";
+import { CookieType } from "../types.js";
 
 export type KdBFlowType = {
     cookie: CookieType;
@@ -13,4 +13,13 @@ export type ResText = {
     text: string;
     flow: KdBNullableFlowType;
 };
-export type Res = ResText;
+
+export type ResArrayBuffer = {
+    type: "arrayBuffer";
+    ab: ArrayBuffer;
+    flow: KdBNullableFlowType;
+};
+export type Res = {
+    res: Response;
+    cookie: CookieType | null;
+};
