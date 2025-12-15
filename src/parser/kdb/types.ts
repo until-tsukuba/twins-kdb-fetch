@@ -6,22 +6,6 @@ export type ParsedRequisiteType = {
     hasLower: boolean;
 }[];
 
-export type ParsedSearchResultType = {
-    code: string;
-    title: string;
-    syllabusLatestLink: string | null;
-    style: string;
-    credit: string;
-    grade: string;
-    term: string | null;
-    day: string | null;
-    agent: string | null;
-    body: string | null;
-    remark: string;
-    auditor: string | null;
-    auditorReason: string | null;
-}[];
-
 export type KdbSubjectRecord = {
     courseCode: string; // 科目番号
     courseName: string; // 科目名
