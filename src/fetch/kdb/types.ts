@@ -1,7 +1,7 @@
 import { CookieType } from "../types.js";
 
 export type KdBFlowType = {
-   readonly cookie: CookieType;
+    readonly cookie: CookieType;
 };
 
 export type KdBNullableFlowType = {
