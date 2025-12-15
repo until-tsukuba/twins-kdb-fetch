@@ -1,6 +1,6 @@
-export type ParsedTwinsCeilType = string | { text: string; onclick: string };
+export type ParsedTwinsCeilType = string | { readonly text: string; readonly onclick: string };
 
 export type ParsedTwinsTableType = {
-    head: ParsedTwinsCeilType[];
-    body: ParsedTwinsCeilType[][];
+    readonly head: readonly ParsedTwinsCeilType[];
+    readonly body: readonly (readonly ParsedTwinsCeilType[])[];
 };

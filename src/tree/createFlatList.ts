@@ -8,10 +8,10 @@ const shallowEqual = (a: unknown, b: unknown) => {
     return JSON.stringify(a) === JSON.stringify(b);
 };
 
-export const createFlatList = (tree: DfsTreeNode<Requisite, SubjectNode[]>) => {
-    const subjectsFlatMap = new Map<string, KdbSubjectRecord & { requisite: Requisite[] }>();
+export const createFlatList = (tree: DfsTreeNode<Requisite, readonly SubjectNode[]>) => {
+    const subjectsFlatMap = new Map<string, KdbSubjectRecord & { readonly requisite: readonly Requisite[] }>();
 
-    visitTree<DfsTreeNode<Requisite, SubjectNode[]> | SubjectNode>(tree, (node, _depth, parent) => {
+    visitTree<DfsTreeNode<Requisite, readonly SubjectNode[]> | SubjectNode>(tree, (node, _depth, parent) => {
         if (node.type === "subject") {
             const existing = subjectsFlatMap.get(node.subject.courseCode);
             const newRequisite = [...(existing?.requisite ?? [])];

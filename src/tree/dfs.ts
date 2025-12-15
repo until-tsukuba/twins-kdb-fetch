@@ -1,6 +1,6 @@
 // depth first search
 
-const mapSeries = async <T, R>(items: T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
+const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
     const results: R[] = [];
     for (const item of items) {
         results.push(await fn(item));
@@ -10,14 +10,14 @@ const mapSeries = async <T, R>(items: T[], fn: (item: T) => Promise<R>): Promise
 
 export type DfsTreeNode<N, R> =
     | {
-          type: "internal";
-          node: N;
-          children: DfsTreeNode<N, R>[];
+          readonly type: "internal";
+          readonly node: N;
+          readonly children: readonly DfsTreeNode<N, R>[];
       }
     | {
-          type: "leaf";
-          node: N;
-          children: R;
+          readonly type: "leaf";
+          readonly node: N;
+          readonly children: R;
       };
 
 type Serializable = {

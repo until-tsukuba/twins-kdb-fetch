@@ -18,7 +18,7 @@ export const JSONSerializer: <T>() => Serializer<T> = () => ({
 const useCache = true; // Set to false to disable cache for debugging
 
 export const cache =
-    <P extends unknown[], R>(cacheKeyFunc: (...props: P) => string, calc: (...props: P) => Promise<R>, serializer: Serializer<R>): ((...props: P) => Promise<R>) =>
+    <P extends readonly unknown[], R>(cacheKeyFunc: (...props: P) => string, calc: (...props: P) => Promise<R>, serializer: Serializer<R>): ((...props: P) => Promise<R>) =>
     async (...props: P) => {
         const cacheKey = cacheKeyFunc(...props);
 

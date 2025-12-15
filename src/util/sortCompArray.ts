@@ -1,4 +1,4 @@
-export const sortCompArray = <T>(a: T[], b: T[], comp?: undefined | ((a: T, b: T) => number)): boolean => {
+export const sortCompArray = <T>(a: readonly T[], b: readonly T[], comp?: undefined | ((a: T, b: T) => number)): boolean => {
     const sortedA = a.toSorted(comp);
     const sortedB = b.toSorted(comp);
 

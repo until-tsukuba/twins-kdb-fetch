@@ -1,6 +1,6 @@
 import { CookieType } from "./types.js";
 
-export const parseCookie = (cookies: string[]): CookieType | null => {
+export const parseCookie = (cookies: readonly string[]): CookieType | null => {
     const map = new Map(
         cookies.map((c) => {
             const p = c.split(";")[0]?.trim().split("=");

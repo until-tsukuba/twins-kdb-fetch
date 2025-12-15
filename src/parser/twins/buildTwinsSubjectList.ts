@@ -26,26 +26,25 @@ const periods = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 type Periods = (typeof periods)[number];
 
 type TimeTable = {
-    day: DaysOfWeek; // 曜日
-    period: Periods | null; // 時限
+    readonly day: DaysOfWeek; // 曜日
+    readonly period: Periods | null; // 時限
 };
 
 type Module = "springA" | "springB" | "springC" | "summerVacation" | "fallA" | "fallB" | "fallC" | "springVacation";
-export type ModuleTimeTable = Record<Module, TimeTable[]>;
+export type ModuleTimeTable = Readonly<Record<Module, readonly TimeTable[]>>;
 
 export type TwinsSubject = {
-    name: string; // 科目名
-    code: string; // 科目番号
-    term: Terms;
-    moduleTimeTable: ModuleTimeTable;
-    instructors: string[]; // 担当教員
-    affiliation: {
-        name: string; // 開設所属名
-        code: string; // 開設所属コード
+    readonly name: string; // 科目名
+    readonly code: string; // 科目番号
+    readonly term: Terms;
+    readonly moduleTimeTable: ModuleTimeTable;
+    readonly instructors: readonly string[]; // 担当教員
+    readonly affiliation: {
+        readonly name: string; // 開設所属名
+        readonly code: string; // 開設所属コード
     };
-    year: number[]; // 標準履修年次
-
-    raw: [term: string, module: string, code: string, title: { text: string; onclick: string }, instructor: string, affiliation: string, year: string];
+    readonly year: readonly number[]; // 標準履修年次
+    readonly raw: readonly [term: string, module: string, code: string, title: { text: string; onclick: string }, instructor: string, affiliation: string, year: string];
 };
 
 const assertValidHeader = (header: ParsedTwinsTableType["head"]) => {
@@ -139,7 +138,7 @@ const parseModuleTimeTable = (moduleString: string): ModuleTimeTable => {
             return { modules, timeTables };
         });
 
-    const moduleTimeTable: ModuleTimeTable = {
+    const moduleTimeTable: Readonly<Record<Module, TimeTable[]>> = {
         springA: [],
         springB: [],
         springC: [],

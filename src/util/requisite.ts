@@ -1,13 +1,13 @@
 import { ParsedRequisiteType } from "../parser/kdb/types.js";
 
 export type RequisiteType = {
-    id: string;
-    name: string;
-    hasLower: boolean;
+    readonly id: string;
+    readonly name: string;
+    readonly hasLower: boolean;
 } | null;
 
 export class Requisite {
-    private requisite: RequisiteType;
+    private readonly requisite: RequisiteType;
 
     constructor(requisite: RequisiteType) {
         this.requisite = requisite;

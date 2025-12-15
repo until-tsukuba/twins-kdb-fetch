@@ -1,1 +1,1 @@
-export type CookieType = Map<string, string>;
+export type CookieType = ReadonlyMap<string, string>;

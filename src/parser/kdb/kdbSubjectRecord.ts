@@ -20,4 +20,4 @@ export const commonHeader = [
     { key: "dataUpdateDate", text: "データ更新日" },
 ] as const;
 
-export type RawKdbSubjectRecord = Record<(typeof commonHeader)[number]["key"], string>;
+export type RawKdbSubjectRecord = Readonly<Record<(typeof commonHeader)[number]["key"], string>>;

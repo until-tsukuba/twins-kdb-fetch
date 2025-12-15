@@ -3,7 +3,7 @@ import { RawKdbSubjectRecord } from "./kdbSubjectRecord.js";
 import { KdbSubjectRecord } from "./types.js";
 import { parseCredit, parseYear } from "./util.js";
 
-export const buildKdbSubjects = (subjects: RawKdbSubjectRecord[]): KdbSubjectRecord[] => {
+export const buildKdbSubjects = (subjects: readonly RawKdbSubjectRecord[]): KdbSubjectRecord[] => {
     return subjects.map((subject) => {
         return {
             courseCode: subject.courseNumber,

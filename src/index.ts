@@ -30,7 +30,7 @@ type MergedSubject = {
         kdbRaw: string | null;
     }; // 単位数
     year: {
-        value: number[];
+        value: readonly number[];
         kdbRaw: string | null;
         twinsRaw: string | null;
     }; // 標準履修年次
@@ -47,7 +47,7 @@ type MergedSubject = {
     };
     classroom: null; // 教室
     instructor: {
-        value: string[];
+        value: readonly string[];
 
         kdbRaw: string | null;
         twinsRaw: string | null;
@@ -67,10 +67,10 @@ type MergedSubject = {
         } | null;
     };
 
-    requisite: Requisite[];
+    requisite: readonly Requisite[];
 };
 
-const arrayShallowEqual = <T>(a: T[], b: T[]): boolean => {
+const arrayShallowEqual = <T>(a: readonly T[], b: readonly T[]): boolean => {
     if (a.length !== b.length) return false;
     // use every
     return a.every((value, index) => value === b[index]);

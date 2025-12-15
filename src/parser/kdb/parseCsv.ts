@@ -1,13 +1,13 @@
 import { parse as csvParse } from "csv-parse/sync";
 import { commonHeader, RawKdbSubjectRecord } from "./kdbSubjectRecord.js";
 
-const assertHeader = (headerLine: string[]) => {
+const assertHeader = (headerLine: readonly string[]) => {
     if (!(commonHeader.length === headerLine.length && commonHeader.every((field, index) => headerLine[index] === field.text))) {
         throw `! invalid header, ${JSON.stringify(headerLine)}, ${JSON.stringify(commonHeader)}, ${JSON.stringify(commonHeader.map((h) => h.text))}`;
     }
 };
 
-const parseRecord = (record: string[]): RawKdbSubjectRecord => {
+const parseRecord = (record: readonly string[]): RawKdbSubjectRecord => {
     if (record.length !== commonHeader.length) {
         throw `! record length invalid, ${record}, ${commonHeader}`;
     }

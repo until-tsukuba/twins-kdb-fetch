@@ -1,5 +1,5 @@
 export type TreeNode<C extends TreeNode<C>> = {
-    children: C[] | null;
+    readonly children: readonly C[] | null;
 };
 export const visitTree = <T extends TreeNode<T>>(tree: T, visitor: (node: T, depth: number, parent: T | null) => void, depth: number = 0, parent: T | null = null) => {
     visitor(tree, depth, parent);
