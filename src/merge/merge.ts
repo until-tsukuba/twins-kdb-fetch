@@ -5,6 +5,8 @@ import { normalizeSubjectTitle } from "../util/subjectTitleNormalize.js";
 import { sortCompArray } from "../util/sortCompArray.js";
 import { KdbSubjectRecord } from "../parser/kdb/types.js";
 import { TwinsSubject } from "../parser/twins/buildTwinsSubjectList.js";
+import { zipMaps } from "./zipMaps.js";
+
 type MergedSubject = {
     code: string; // 科目番号
     name: string; // 科目名
@@ -77,23 +79,20 @@ export const mergeKdbAndTwinsSubjects = (
     kdbTree: {
         subjectsFlatList: readonly (KdbSubjectRecord & {
             readonly requisite: readonly Requisite[];
-        })[]; },
+        })[];
+    },
     twins: readonly TwinsSubject[],
 ): { irregularSubjects: { key: string; reason: string }[]; mergedSubjects: MergedSubject[] } => {
     const kdbFlatSubjectsMap = new Map(kdbFlat.map((subject) => [subject.courseCode, subject]));
     const kdbTreeSubjectsMap = new Map(kdbTree.subjectsFlatList.map((subject) => [subject.courseCode, subject]));
     const twinsSubjectsMap = new Map(twins.map((subject) => [subject.code, subject]));
 
-    const mergedKey = [...new Set([...kdbFlatSubjectsMap.keys(), ...kdbTreeSubjectsMap.keys(), ...twinsSubjectsMap.keys()])];
+    const subjects = zipMaps(kdbFlatSubjectsMap, kdbTreeSubjectsMap, twinsSubjectsMap);
 
     const irregularSubjects: { key: string; reason: string }[] = [];
 
-    const mergedSubjects: MergedSubject[] = mergedKey.map((key) => {
+    const mergedSubjects: MergedSubject[] = subjects.map(([ key, kdbFlatSubject, kdbTreeSubject, twinsSubject ]) => {
         console.log(`Processing subject: ${key}`);
-
-        const kdbFlatSubject = kdbFlatSubjectsMap.get(key);
-        const kdbTreeSubject = kdbTreeSubjectsMap.get(key);
-        const twinsSubject = twinsSubjectsMap.get(key);
 
         if (!kdbFlatSubject && !kdbTreeSubject && !twinsSubject) {
             throw new Error(`No subject found for key: ${key}`);
