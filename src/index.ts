@@ -6,6 +6,8 @@ import { getTwinsData } from "./twins.js";
 import { InstructionalType } from "./util/instructionalType.js";
 import { Requisite } from "./util/requisite.js";
 import { outputReplacer } from "./util/jsonReplacer.js";
+import { normalizeSubjectTitle } from "./util/subjectTitleNormalize.js";
+import { sortCompArray } from "./util/sortCompArray.js";
 
 type MergedSubject = {
     code: string; // 科目番号
@@ -165,7 +167,7 @@ const main = async () => {
         return {
             code: key,
             // 8310205
-            name: choose(twinsSubject?.name, kdbFlatSubject?.courseName),
+            name: choose(twinsSubject?.name, kdbFlatSubject?.courseName, (a, b) => normalizeSubjectTitle(a) === b),
             syllabusLatestLink: null,
             instructionalType: {
                 value: kdbFlatSubject?.courseType ?? null,
@@ -200,7 +202,7 @@ const main = async () => {
                 value: choose(
                     twinsSubject?.instructors,
                     kdbFlatSubject?.instructor?.split(/[,、，]/).map((s) => s.trim()),
-                    arrayShallowEqual,
+                    sortCompArray,
                 ),
                 kdbRaw: kdbFlatSubject?.instructor ?? null,
                 twinsRaw: twinsSubject?.raw[4] ?? null,
