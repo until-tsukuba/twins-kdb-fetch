@@ -74,7 +74,10 @@ const arrayShallowEqual = <T>(a: readonly T[], b: readonly T[]): boolean => {
 
 export const mergeKdbAndTwinsSubjects = (
     kdbFlat: readonly KdbSubjectRecord[],
-    kdbTree: { subjectsFlatList: readonly KdbSubjectRecord[] },
+    kdbTree: {
+        subjectsFlatList: readonly (KdbSubjectRecord & {
+            readonly requisite: readonly Requisite[];
+        })[]; },
     twins: readonly TwinsSubject[],
 ): { irregularSubjects: { key: string; reason: string }[]; mergedSubjects: MergedSubject[] } => {
     const kdbFlatSubjectsMap = new Map(kdbFlat.map((subject) => [subject.courseCode, subject]));
