@@ -1,6 +1,6 @@
 // depth first search
 
-import { mapSeries } from '../util/mapSeries.js';
+import { mapSeries } from "../util/mapSeries.js";
 
 export type DfsTreeNode<N, R> =
     | {

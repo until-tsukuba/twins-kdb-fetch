@@ -8,23 +8,13 @@ import { mergeKdbAndTwinsSubjects } from "./merge/merge.js";
 const main = async () => {
     await mkdir("output", { recursive: true });
 
-    console.log("Start fetching data...");
-
-    console.log("Start fetching kdb tree data...");
     const kdbTree = await getKdbTreeData();
-    console.log("Finished fetching kdb tree data.");
 
-    console.log("Start fetching kdb flat data...");
     const kdbFlat = await getKdbFlatData();
-    console.log("Finished fetching kdb flat data.");
 
-    console.log("Start fetching twins data...");
     const twins = await getTwinsData();
-    console.log("Finished fetching twins data.");
 
-    console.log("Finished fetching data.");
-
-    const { irregularSubjects, mergedSubjects } = mergeKdbAndTwinsSubjects(kdbFlat, kdbTree, twins);
+    const { irregularSubjects, mergedSubjects } = await mergeKdbAndTwinsSubjects(kdbFlat, kdbTree, twins);
 
     await writeFile("output/subjects.merged.json", JSON.stringify(mergedSubjects, outputReplacer, 4), "utf8");
 

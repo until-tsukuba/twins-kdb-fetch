@@ -5,7 +5,9 @@ import { normalizeSubjectTitle } from "../util/subjectTitleNormalize.js";
 import { sortCompArray } from "../util/sortCompArray.js";
 import { KdbSubjectRecord } from "../parser/kdb/types.js";
 import { TwinsSubject } from "../parser/twins/buildTwinsSubjectList.js";
+import { wrapWithStepLogging, runWithSubjectLogging, log } from "../log.js";
 import { zipMaps } from "./zipMaps.js";
+import { mapSeries } from "../util/mapSeries.js";
 
 type MergedSubject = {
     code: string; // 科目番号
@@ -74,153 +76,156 @@ const arrayShallowEqual = <T>(a: readonly T[], b: readonly T[]): boolean => {
     return a.every((value, index) => value === b[index]);
 };
 
-export const mergeKdbAndTwinsSubjects = (
-    kdbFlat: readonly KdbSubjectRecord[],
-    kdbTree: {
-        subjectsFlatList: readonly (KdbSubjectRecord & {
-            readonly requisite: readonly Requisite[];
-        })[];
-    },
-    twins: readonly TwinsSubject[],
-): { irregularSubjects: { key: string; reason: string }[]; mergedSubjects: MergedSubject[] } => {
-    const kdbFlatSubjectsMap = new Map(kdbFlat.map((subject) => [subject.courseCode, subject]));
-    const kdbTreeSubjectsMap = new Map(kdbTree.subjectsFlatList.map((subject) => [subject.courseCode, subject]));
-    const twinsSubjectsMap = new Map(twins.map((subject) => [subject.code, subject]));
+export const mergeKdbAndTwinsSubjects = wrapWithStepLogging(
+    "merge",
+    async (
+        kdbFlat: readonly KdbSubjectRecord[],
+        kdbTree: {
+            subjectsFlatList: readonly (KdbSubjectRecord & {
+                readonly requisite: readonly Requisite[];
+            })[];
+        },
+        twins: readonly TwinsSubject[],
+    ): Promise<{ irregularSubjects: { key: string; reason: string }[]; mergedSubjects: MergedSubject[] }> => {
+        const kdbFlatSubjectsMap = new Map(kdbFlat.map((subject) => [subject.courseCode, subject]));
+        const kdbTreeSubjectsMap = new Map(kdbTree.subjectsFlatList.map((subject) => [subject.courseCode, subject]));
+        const twinsSubjectsMap = new Map(twins.map((subject) => [subject.code, subject]));
 
-    const subjects = zipMaps(kdbFlatSubjectsMap, kdbTreeSubjectsMap, twinsSubjectsMap);
+        const subjects = zipMaps(kdbFlatSubjectsMap, kdbTreeSubjectsMap, twinsSubjectsMap);
 
-    const irregularSubjects: { key: string; reason: string }[] = [];
+        const irregularSubjects: { key: string; reason: string }[] = [];
 
-    const mergedSubjects: MergedSubject[] = subjects.map(([ key, kdbFlatSubject, kdbTreeSubject, twinsSubject ]) => {
-        console.log(`Processing subject: ${key}`);
+        const mergedSubjects: MergedSubject[] = await mapSeries(subjects, ([key, kdbFlatSubject, kdbTreeSubject, twinsSubject]) => {
+            return runWithSubjectLogging(key, () => {
+                if (!kdbFlatSubject && !kdbTreeSubject && !twinsSubject) {
+                    throw new Error(`No subject found for key: ${key}`);
+                }
 
-        if (!kdbFlatSubject && !kdbTreeSubject && !twinsSubject) {
-            throw new Error(`No subject found for key: ${key}`);
-        }
-
-        if (!kdbFlatSubject) {
-            console.warn(`* Subject ${key} not found in kdb flat data`);
-            irregularSubjects.push({
-                key,
-                reason: "Not found in kdb flat data",
-            });
-        }
-        if (!kdbTreeSubject) {
-            console.warn(`* Subject ${key} not found in kdb tree data`);
-            irregularSubjects.push({
-                key,
-                reason: "Not found in kdb tree data",
-            });
-        }
-        if (!twinsSubject) {
-            // 今年度開講しない科目など
-        }
-
-        const choose = <T>(twins: T | undefined, kdb: T | undefined, compFunc?: (a: T, b: T) => boolean): T => {
-            if (twins !== undefined && kdb !== undefined) {
-                const isEqual = compFunc ? compFunc(twins, kdb) : twins === kdb;
-
-                if (!isEqual) {
-                    // Log irregular subjects
+                if (!kdbFlatSubject) {
+                    log.info(`* Subject ${key} not found in kdb flat data`);
                     irregularSubjects.push({
                         key,
-                        reason: `KDB: ${JSON.stringify(kdb)}, Twins: ${JSON.stringify(twins)}`,
+                        reason: "Not found in kdb flat data",
                     });
-                    console.warn(`Irregular subject found: ${key}, KdB: ${JSON.stringify(kdb)}, Twins: ${JSON.stringify(twins)}`);
                 }
-                return twins;
-            }
+                if (!kdbTreeSubject) {
+                    log.info(`* Subject ${key} not found in kdb tree data`);
+                    irregularSubjects.push({
+                        key,
+                        reason: "Not found in kdb tree data",
+                    });
+                }
+                if (!twinsSubject) {
+                    // 今年度開講しない科目など
+                }
 
-            if (twins !== undefined) {
-                return twins;
-            } else if (kdb !== undefined) {
-                return kdb;
-            }
+                const choose = <T>(twins: T | undefined, kdb: T | undefined, compFunc?: (a: T, b: T) => boolean): T => {
+                    if (twins !== undefined && kdb !== undefined) {
+                        const isEqual = compFunc ? compFunc(twins, kdb) : twins === kdb;
 
-            throw new Error(`No data found`);
-        };
+                        if (!isEqual) {
+                            // Log irregular subjects
+                            irregularSubjects.push({
+                                key,
+                                reason: `KDB: ${JSON.stringify(kdb)}, Twins: ${JSON.stringify(twins)}`,
+                            });
+                            log.info(`Irregular subject found: ${key}, KdB: ${JSON.stringify(kdb)}, Twins: ${JSON.stringify(twins)}`);
+                        }
+                        return twins;
+                    }
 
-        const creditValue = (() => {
-            if (!kdbFlatSubject) return null;
-            if (typeof kdbFlatSubject?.credits.value === "number") {
-                return { type: "number", value: kdbFlatSubject.credits.value } as const;
-            }
-            return { type: "none" } as const;
-        })();
+                    if (twins !== undefined) {
+                        return twins;
+                    } else if (kdb !== undefined) {
+                        return kdb;
+                    }
+
+                    throw new Error(`No data found`);
+                };
+
+                const creditValue = (() => {
+                    if (!kdbFlatSubject) return null;
+                    if (typeof kdbFlatSubject?.credits.value === "number") {
+                        return { type: "number", value: kdbFlatSubject.credits.value } as const;
+                    }
+                    return { type: "none" } as const;
+                })();
+
+                return {
+                    code: key,
+                    // 8310205
+                    name: choose(twinsSubject?.name, kdbFlatSubject?.courseName, (a, b) => normalizeSubjectTitle(a) === b),
+                    syllabusLatestLink: null,
+                    instructionalType: {
+                        value: kdbFlatSubject?.courseType ?? null,
+                        kdbRaw: kdbFlatSubject?.courseType.code ?? null,
+                    },
+                    credits: {
+                        value: creditValue,
+                        kdbRaw: kdbFlatSubject?.credits.text ?? null,
+                    },
+                    year: {
+                        // BB11451
+                        value: choose(twinsSubject?.year, kdbFlatSubject?.year.value, arrayShallowEqual),
+                        kdbRaw: kdbFlatSubject?.year.text ?? null,
+                        twinsRaw: twinsSubject?.raw[6] ?? null,
+                    },
+                    terms: {
+                        term: twinsSubject?.term ?? null,
+                        module: kdbFlatSubject?.term ?? null,
+                        weekdayAndPeriod: kdbFlatSubject?.weekdayAndPeriod ?? null,
+                        moduleTimeTable: twinsSubject?.moduleTimeTable ?? null,
+
+                        twinsRaw: twinsSubject
+                            ? {
+                                  term: twinsSubject.raw[0],
+                                  termCode: twinsSubject.raw[3].onclick,
+                                  module: twinsSubject.raw[1],
+                              }
+                            : null,
+                    },
+                    classroom: null,
+                    instructor: {
+                        value: choose(
+                            twinsSubject?.instructors,
+                            kdbFlatSubject?.instructor?.split(/[,、，]/).map((s) => s.trim()),
+                            sortCompArray,
+                        ),
+                        kdbRaw: kdbFlatSubject?.instructor ?? null,
+                        twinsRaw: twinsSubject?.raw[4] ?? null,
+                    },
+                    overview: kdbFlatSubject?.overview ?? null,
+                    remarks: kdbFlatSubject?.remarks ?? null,
+                    auditor: kdbFlatSubject?.auditor ?? null,
+                    conditionsForAuditors: kdbFlatSubject?.conditionsForAuditors ?? null,
+                    exchangeStudent: kdbFlatSubject?.exchangeStudent ?? null,
+                    conditionsForExchangeStudents: kdbFlatSubject?.conditionsForExchangeStudents ?? null,
+                    JaEnCourseName: kdbFlatSubject?.JaEnCourseName ?? null,
+                    parentNumber: kdbFlatSubject?.parentNumber ?? null,
+                    parentCourseName: kdbFlatSubject?.parentCourseName ?? null,
+
+                    affiliation: {
+                        name: twinsSubject?.affiliation.name ?? null,
+                        code: twinsSubject?.affiliation.code ?? null,
+
+                        twinsRaw: twinsSubject
+                            ? {
+                                  name: twinsSubject.raw[5],
+                                  code: twinsSubject.raw[3].onclick,
+                              }
+                            : null,
+                    },
+
+                    kdbDataUpdateDate: kdbFlatSubject?.dataUpdateDate ?? null,
+
+                    requisite: kdbTreeSubject?.requisite || [], // kdbTreeSubject
+                };
+            });
+        });
 
         return {
-            code: key,
-            // 8310205
-            name: choose(twinsSubject?.name, kdbFlatSubject?.courseName, (a, b) => normalizeSubjectTitle(a) === b),
-            syllabusLatestLink: null,
-            instructionalType: {
-                value: kdbFlatSubject?.courseType ?? null,
-                kdbRaw: kdbFlatSubject?.courseType.code ?? null,
-            },
-            credits: {
-                value: creditValue,
-                kdbRaw: kdbFlatSubject?.credits.text ?? null,
-            },
-            year: {
-                // BB11451
-                value: choose(twinsSubject?.year, kdbFlatSubject?.year.value, arrayShallowEqual),
-                kdbRaw: kdbFlatSubject?.year.text ?? null,
-                twinsRaw: twinsSubject?.raw[6] ?? null,
-            },
-            terms: {
-                term: twinsSubject?.term ?? null,
-                module: kdbFlatSubject?.term ?? null,
-                weekdayAndPeriod: kdbFlatSubject?.weekdayAndPeriod ?? null,
-                moduleTimeTable: twinsSubject?.moduleTimeTable ?? null,
-
-                twinsRaw: twinsSubject
-                    ? {
-                          term: twinsSubject.raw[0],
-                          termCode: twinsSubject.raw[3].onclick,
-                          module: twinsSubject.raw[1],
-                      }
-                    : null,
-            },
-            classroom: null,
-            instructor: {
-                value: choose(
-                    twinsSubject?.instructors,
-                    kdbFlatSubject?.instructor?.split(/[,、，]/).map((s) => s.trim()),
-                    sortCompArray,
-                ),
-                kdbRaw: kdbFlatSubject?.instructor ?? null,
-                twinsRaw: twinsSubject?.raw[4] ?? null,
-            },
-            overview: kdbFlatSubject?.overview ?? null,
-            remarks: kdbFlatSubject?.remarks ?? null,
-            auditor: kdbFlatSubject?.auditor ?? null,
-            conditionsForAuditors: kdbFlatSubject?.conditionsForAuditors ?? null,
-            exchangeStudent: kdbFlatSubject?.exchangeStudent ?? null,
-            conditionsForExchangeStudents: kdbFlatSubject?.conditionsForExchangeStudents ?? null,
-            JaEnCourseName: kdbFlatSubject?.JaEnCourseName ?? null,
-            parentNumber: kdbFlatSubject?.parentNumber ?? null,
-            parentCourseName: kdbFlatSubject?.parentCourseName ?? null,
-
-            affiliation: {
-                name: twinsSubject?.affiliation.name ?? null,
-                code: twinsSubject?.affiliation.code ?? null,
-
-                twinsRaw: twinsSubject
-                    ? {
-                          name: twinsSubject.raw[5],
-                          code: twinsSubject.raw[3].onclick,
-                      }
-                    : null,
-            },
-
-            kdbDataUpdateDate: kdbFlatSubject?.dataUpdateDate ?? null,
-
-            requisite: kdbTreeSubject?.requisite || [], // kdbTreeSubject
+            irregularSubjects,
+            mergedSubjects,
         };
-    });
-
-    return {
-        irregularSubjects,
-        mergedSubjects,
-    };
-};
+    },
+);

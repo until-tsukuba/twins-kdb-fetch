@@ -11,31 +11,28 @@ import { createTreeText } from "./tree/createTreeText.js";
 import { outputReplacer } from "./util/jsonReplacer.js";
 import { getChildRequisiteWithCache, getKdbInitFlow, getSubjectRecordsWithCache } from "./helper/kdb/subjects.js";
 import { Requisite } from "./util/requisite.js";
+import { wrapWithRequisiteLogging, wrapWithStepLogging } from "./log.js";
 
-const getNextHierarchy = (flow: KdBFlowType) => async (requisite: Requisite) => {
-    console.log(`Processing getNext hierarchy node: ${requisite.serialize()}`);
-    const children = await getChildRequisiteWithCache(flow, requisite);
+const getNextHierarchy = (flow: KdBFlowType) =>
+    wrapWithRequisiteLogging(async (requisite: Requisite) => {
+        const children = await getChildRequisiteWithCache(flow, requisite);
 
-    return children;
-};
+        return children;
+    });
 
-const getSubjectRecordTree = (flow: KdBFlowType) => async (requisite: Requisite) => {
-    console.log(`Processing getSubjectRecords hierarchy node: ${requisite.serialize()}`);
-    const kdbSubjectRecords = await getSubjectRecordsWithCache(flow, requisite);
+const getSubjectRecordTree = (flow: KdBFlowType) =>
+    wrapWithRequisiteLogging(async (requisite: Requisite) => {
+        const kdbSubjectRecords = await getSubjectRecordsWithCache(flow, requisite);
 
-    const subjects = createSubjectNodeList(kdbSubjectRecords);
+        const subjects = createSubjectNodeList(kdbSubjectRecords);
 
-    return subjects;
-};
+        return subjects;
+    });
 
-export const getKdbTreeData = async () => {
+export const getKdbTreeData = wrapWithStepLogging("kdb-tree", async () => {
     const flow = await getKdbInitFlow();
 
-    const tree = await dfs<Requisite, SubjectNode[]>(
-        Requisite.root,
-        getNextHierarchy(flow),
-        getSubjectRecordTree(flow),
-    );
+    const tree = await dfs<Requisite, SubjectNode[]>(Requisite.root, getNextHierarchy(flow), getSubjectRecordTree(flow));
 
     const subjectsFlatList = createFlatList(tree);
 
@@ -50,6 +47,4 @@ export const getKdbTreeData = async () => {
         subjectsFlatList,
         subjectCategoryText,
     };
-};
-
-// getKdbData();
+});
