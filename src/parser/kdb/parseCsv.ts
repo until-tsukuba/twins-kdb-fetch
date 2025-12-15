@@ -11,7 +11,7 @@ const parseRecord = (record: string[]): RawKdbSubjectRecord => {
     if (record.length !== commonHeader.length) {
         throw `! record length invalid, ${record}, ${commonHeader}`;
     }
-    return Object.fromEntries(record.map((field, i) => [commonHeader[i]?.key, field]));
+    return Object.fromEntries(record.map((field, i) => [commonHeader[i]?.key, field.trim()]));
 };
 
 export const getSubjectsRecord = (csvStr: string, isRoot: boolean, fileName?: string): { category: string | null; subjects: RawKdbSubjectRecord[] } => {
@@ -29,7 +29,7 @@ export const getSubjectsRecord = (csvStr: string, isRoot: boolean, fileName?: st
         const rest = csvStr.slice(firstNewlineIndex + 1);
         return { category: rawCategory, clippedCsvStr: rest };
     })();
-    
+
     const parsed = csvParse(clippedCsvStr);
 
     const clippedParsed = ((parsed) => {
@@ -37,16 +37,15 @@ export const getSubjectsRecord = (csvStr: string, isRoot: boolean, fileName?: st
             // no csv header line
             return parsed;
         }
-        
+
         if (parsed[0] === undefined) {
             throw "! empty csv data";
         }
-        
-        assertHeader(parsed[ 0 ]);
-        
+
+        assertHeader(parsed[0]);
+
         return parsed.slice(1);
     })(parsed);
-
 
     const subjects: RawKdbSubjectRecord[] = clippedParsed.map((line, i) => parseRecord(line));
     return { category, subjects };
