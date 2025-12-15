@@ -1,4 +1,6 @@
+export type ParsedTwinsCeilType = string | { text: string; onclick: string };
+
 export type ParsedTwinsTableType = {
-    head: (string | { text: string; onclick: string })[];
-    body: (string | { text: string; onclick: string })[][];
+    head: ParsedTwinsCeilType[];
+    body: ParsedTwinsCeilType[][];
 };
