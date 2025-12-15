@@ -1,4 +1,5 @@
 import { ParsedTwinsTableType } from "./types.js";
+import { assertCeilIsString } from "./util.js";
 
 const twinsHeader = [
     { key: null, text: "No." },
@@ -176,6 +177,15 @@ const parseTitleOnclick = (onclick: string) => {
     return { nendo, termCode, affiliationCode, courseCode, title: title.trim() };
 };
 
+const parseInstructors = (text: string): string[] => {
+    // "宮内 久絵,秋山 肇,松島 亘志,アランニャ, クラウス"
+    const instructorList = text
+        .split(",")
+        .map((instructor) => instructor.trim())
+        .filter((instructor) => instructor);
+    return instructorList;
+};
+
 const parseYear = (yearString: string): number[] => {
     // 1・2・3・4・5年
 
@@ -195,6 +205,14 @@ const parseYear = (yearString: string): number[] => {
         });
 };
 
+const parseTerms = (text: string): Terms => {
+    const term = terms.find((t) => t.text === text);
+    if (!term) {
+        throw new Error(`Invalid term: ${text}`);
+    }
+    return term;
+};
+
 const buildTwinsSubject = (row: ParsedTwinsTableType["body"][number]): TwinsSubject => {
     if (row.length !== twinsHeader.length) {
         throw new Error(`Row length mismatch: expected ${twinsHeader.length}, got ${row.length}`);
@@ -205,25 +223,15 @@ const buildTwinsSubject = (row: ParsedTwinsTableType["body"][number]): TwinsSubj
     console.log(`Processing subject index: ${_subjectIndex}, ${row[3]}`);
 
     const termString = row[1];
-    if (typeof termString !== "string") {
-        throw new Error(`Term is not a string: ${JSON.stringify(termString)}`);
-    }
-    const term = terms.find((t) => t.text === termString);
-    if (!term) {
-        throw new Error(`Invalid term: ${termString}`);
-    }
+    assertCeilIsString(termString);
+    const term = parseTerms(termString);
 
-    // "春A(火1,火2)、春B(金5,金6)",
     const moduleString = row[2];
-    if (typeof moduleString !== "string") {
-        throw new Error(`Module is not a string: ${JSON.stringify(moduleString)}`);
-    }
+    assertCeilIsString(moduleString);
     const moduleTimeTable = parseModuleTimeTable(moduleString);
 
     const courseCode = row[3];
-    if (typeof courseCode !== "string") {
-        throw new Error(`Course code is not a string: ${JSON.stringify(courseCode)}`);
-    }
+    assertCeilIsString(courseCode);
 
     const courseTitle = row[4];
     if (typeof courseTitle !== "object" || !courseTitle.text || !courseTitle.onclick) {
@@ -241,24 +249,14 @@ const buildTwinsSubject = (row: ParsedTwinsTableType["body"][number]): TwinsSubj
     }
 
     const instructors = row[5];
-    if (typeof instructors !== "string") {
-        throw new Error(`Instructors is not a string: ${JSON.stringify(instructors)}`);
-    }
-    // "宮内 久絵,秋山 肇,松島 亘志,アランニャ, クラウス"
-    const instructorList = instructors
-        .split(",")
-        .map((instructor) => instructor.trim())
-        .filter((instructor) => instructor);
+    assertCeilIsString(instructors);
+    const instructorList = parseInstructors(instructors);
 
     const affiliation = row[6];
-    if (typeof affiliation !== "string") {
-        throw new Error(`Affiliation is not a string: ${JSON.stringify(affiliation)}`);
-    }
+    assertCeilIsString(affiliation);
 
     const yearString = row[7];
-    if (typeof yearString !== "string") {
-        throw new Error(`Year is not a string: ${JSON.stringify(yearString)}`);
-    }
+    assertCeilIsString(yearString);
     const year = parseYear(yearString);
 
     return {
