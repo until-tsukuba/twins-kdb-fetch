@@ -1,12 +1,6 @@
 // depth first search
 
-const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
-    const results: R[] = [];
-    for (const item of items) {
-        results.push(await fn(item));
-    }
-    return results;
-};
+import { mapSeries } from '../util/mapSeries.js';
 
 export type DfsTreeNode<N, R> =
     | {
@@ -28,7 +22,6 @@ export const dfs = async <N extends Serializable, R>(root: N, getChildren: (node
     const visited = new Map<string, DfsTreeNode<N, R>>();
 
     const rec = async (node: N): Promise<DfsTreeNode<N, R>> => {
-        console.log(`Visiting node: ${JSON.stringify(node)}`);
         if (visited.has(node.serialize())) {
             const cached = visited.get(node.serialize());
             if (cached === undefined) {
