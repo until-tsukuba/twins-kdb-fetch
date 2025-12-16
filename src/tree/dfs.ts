@@ -1,5 +1,6 @@
 // depth first search
 
+import { wrapWithSerializableLogging } from "../log.js";
 import { mapSeries } from "../util/mapSeries.js";
 
 export type DfsTreeNode<N, R> =
@@ -14,14 +15,14 @@ export type DfsTreeNode<N, R> =
           readonly children: R;
       };
 
-type Serializable = {
+export type Serializable = {
     serialize(): string;
 };
 
 export const dfs = async <N extends Serializable, R>(root: N, getChildren: (node: N) => Promise<N[]>, leafVisiter: (node: N) => Promise<R>): Promise<DfsTreeNode<N, R>> => {
     const visited = new Map<string, DfsTreeNode<N, R>>();
 
-    const rec = async (node: N): Promise<DfsTreeNode<N, R>> => {
+    const rec = wrapWithSerializableLogging(async (node: N): Promise<DfsTreeNode<N, R>> => {
         if (visited.has(node.serialize())) {
             const cached = visited.get(node.serialize());
             if (cached === undefined) {
@@ -50,7 +51,7 @@ export const dfs = async <N extends Serializable, R>(root: N, getChildren: (node
         };
         visited.set(node.serialize(), internalNode);
         return internalNode;
-    };
+    });
 
     return await rec(root);
 };
