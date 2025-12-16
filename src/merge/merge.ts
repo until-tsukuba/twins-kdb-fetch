@@ -20,17 +20,27 @@ type MergedSubject = {
     credits: {
         value:
             | {
-                  type: "number";
+                  type: "normal";
                   value: number;
               }
             | {
                   type: "none";
               }
+            | {
+                  type: "unknown";
+              }
             | null;
         kdbRaw: string | null;
     }; // 単位数
     year: {
-        value: readonly number[];
+        value:
+            | {
+                  type: "normal";
+                  value: readonly number[];
+              }
+            | {
+                  type: "unknown";
+              };
         kdbRaw: string | null;
         twinsRaw: string | null;
     }; // 標準履修年次
@@ -143,12 +153,35 @@ export const mergeKdbAndTwinsSubjects = wrapWithStepLogging(
                     throw new Error(`No data found`);
                 };
 
-                const creditValue = (() => {
-                    if (!kdbFlatSubject) return null;
-                    if (typeof kdbFlatSubject?.credits.value === "number") {
-                        return { type: "number", value: kdbFlatSubject.credits.value } as const;
+                const yearValue = (() => {
+                    const twinsYear = twinsSubject?.year;
+                    const wrapTwinsYear = (y: readonly number[]) => ({ type: "normal", value: y }) as const;
+                    const kdbYear = kdbFlatSubject?.year.value;
+
+                    if (twinsYear && kdbYear) {
+                        if (kdbYear.type !== "normal") {
+                            irregularSubjects.push({
+                                key,
+                                reason: `KDB year type is not normal: ${kdbYear.type}`,
+                            });
+                            log.info(`Irregular subject found: ${key}, KdB year type is not normal: ${kdbYear.type}`);
+                            return wrapTwinsYear(twinsYear);
+                        }
+                        const isEqual = arrayShallowEqual(twinsYear, kdbYear.value);
+                        if (!isEqual) {
+                            irregularSubjects.push({
+                                key,
+                                reason: `KDB year value: ${JSON.stringify(kdbYear.value)}, Twins year value: ${JSON.stringify(twinsYear)}`,
+                            });
+                            log.info(`Irregular subject found: ${key}, KdB year value: ${JSON.stringify(kdbYear.value)}, Twins year value: ${JSON.stringify(twinsYear)}`);
+                        }
+                        return wrapTwinsYear(twinsYear);
+                    } else if (twinsYear) {
+                        return wrapTwinsYear(twinsYear);
+                    } else if (kdbYear) {
+                        return kdbYear;
                     }
-                    return { type: "none" } as const;
+                    throw new Error(`No year data found`);
                 })();
 
                 return {
@@ -161,12 +194,12 @@ export const mergeKdbAndTwinsSubjects = wrapWithStepLogging(
                         kdbRaw: kdbFlatSubject?.courseType.code ?? null,
                     },
                     credits: {
-                        value: creditValue,
+                        value: kdbFlatSubject?.credits.value ?? null,
                         kdbRaw: kdbFlatSubject?.credits.text ?? null,
                     },
                     year: {
                         // BB11451
-                        value: choose(twinsSubject?.year, kdbFlatSubject?.year.value, arrayShallowEqual),
+                        value: yearValue,
                         kdbRaw: kdbFlatSubject?.year.text ?? null,
                         twinsRaw: twinsSubject?.raw[6] ?? null,
                     },

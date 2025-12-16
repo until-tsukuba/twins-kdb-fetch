@@ -14,11 +14,28 @@ export type KdbSubjectRecord = {
     }; // 授業方法
     readonly credits: {
         readonly text: string;
-        readonly value: number | null;
+        readonly value:
+            | {
+                  readonly type: "normal";
+                  readonly value: number;
+              }
+            | {
+                  readonly type: "none";
+              }
+            | {
+                  readonly type: "unknown";
+              };
     }; // 単位数
     readonly year: {
         readonly text: string;
-        readonly value: readonly number[];
+        readonly value:
+            | {
+                  readonly type: "normal";
+                  readonly value: readonly number[];
+              }
+            | {
+                  readonly type: "unknown";
+              };
     }; // 標準履修年次
     readonly term: string; // 実施学期
     readonly weekdayAndPeriod: string; // 曜時限
