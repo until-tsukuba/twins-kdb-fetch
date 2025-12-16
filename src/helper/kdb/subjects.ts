@@ -18,7 +18,7 @@ const getSubjectRecords = async (flow: KdBFlowType, requisiteCode: Requisite) =>
     if (requisiteCode.getName() !== parsedSearchResult.category) {
         log.info(`Requisite name mismatch: ${requisiteCode.getName()} !== ${parsedSearchResult.category}`);
     }
-    const kdbSubjectRecords = buildKdbSubjects(parsedSearchResult.subjects);
+    const kdbSubjectRecords = await buildKdbSubjects(parsedSearchResult.subjects);
 
     return kdbSubjectRecords;
 };

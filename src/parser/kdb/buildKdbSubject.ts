@@ -1,10 +1,12 @@
+import { runWithSubjectLogging } from '../../log.js';
 import { getInstructionalType } from "../../util/instructionalType.js";
+import { mapSeries } from '../../util/mapSeries.js';
 import { RawKdbSubjectRecord } from "./kdbSubjectRecord.js";
 import { KdbSubjectRecord } from "./types.js";
 import { parseCredit, parseYear } from "./util.js";
 
-export const buildKdbSubjects = (subjects: readonly RawKdbSubjectRecord[]): KdbSubjectRecord[] => {
-    return subjects.map((subject) => {
+export const buildKdbSubjects = (subjects: readonly RawKdbSubjectRecord[]): Promise<KdbSubjectRecord[]> => {
+    return mapSeries(subjects, (subject) => runWithSubjectLogging(subject.courseNumber, () => {
         return {
             courseCode: subject.courseNumber,
             courseName: subject.courseName,
@@ -35,5 +37,5 @@ export const buildKdbSubjects = (subjects: readonly RawKdbSubjectRecord[]): KdbS
             parentCourseName: subject.parentCourseName,
             dataUpdateDate: subject.dataUpdateDate,
         };
-    });
+    }));
 };
