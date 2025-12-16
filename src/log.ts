@@ -47,7 +47,7 @@ const requisiteText = () => {
     if (!requisites) {
         return null;
     }
-    return `[requisites: ${requisites.serialize()}]`;
+    return `[requisites: ${requisites.serialize().padStart(5, " ")}]`;
 };
 
 const indexNText = () => {
@@ -64,15 +64,15 @@ export const log = {
     },
 };
 
-export const wrapWithIndexNLogging = <A extends unknown[], R>(index: number, length: number, fn: (...args: A) => R | Promise<R>): ((...args: A) => Promise<R>) => {
-    return (...args: A) =>
-        withProcessingIndexN.run({ index, length }, async () => {
-            log.info("Start");
-            const result = await fn(...args);
-            log.info("Finished");
-            return result;
-        });
+export const runWithIndexNLogging = <A extends unknown[], R>(index: number, length: number, fn: (...args: A) => R | Promise<R>, ...args: A): Promise<R> => {
+    return withProcessingIndexN.run({ index, length }, async () => {
+        log.info("Start");
+        const result = await fn(...args);
+        log.info("Finished");
+        return result;
+    });
 };
+
 export const runWithSubjectLogging = async <R>(subjectId: string, fn: () => R | Promise<R>): Promise<R> => {
     return await withProcessingSubject.run(subjectId, async () => {
         log.info("Start");
