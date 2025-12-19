@@ -14,7 +14,7 @@ const parseRecord = (record: readonly string[]): RawKdbSubjectRecord => {
     return Object.fromEntries(record.map((field, i) => [commonHeader[i]?.key, field.trim()]));
 };
 
-export const getSubjectsRecord = (csvStr: string, isRoot: boolean, fileName?: string): { category: string | null; subjects: RawKdbSubjectRecord[] } => {
+export const getSubjectsRecord = (csvStr: string, isRoot: boolean): { category: string | null; subjects: RawKdbSubjectRecord[] } => {
     const { category, clippedCsvStr } = (() => {
         if (isRoot) {
             return { category: null, clippedCsvStr: csvStr };
@@ -47,6 +47,6 @@ export const getSubjectsRecord = (csvStr: string, isRoot: boolean, fileName?: st
         return parsed.slice(1);
     })(parsed);
 
-    const subjects: RawKdbSubjectRecord[] = clippedParsed.map((line, i) => parseRecord(line));
+    const subjects: RawKdbSubjectRecord[] = clippedParsed.map(line => parseRecord(line));
     return { category, subjects };
 };

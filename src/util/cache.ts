@@ -28,7 +28,7 @@ export const cache =
             }
             const cached = serializer.deserialize(await readFile(`cache/${cacheKey}`, "utf8"));
             return cached;
-        } catch (error) {
+        } catch {
             const result = await calc(...props);
             await mkdir("cache", { recursive: true });
             await writeFile(`cache/${cacheKey}`, serializer.serialize(result), "utf8");

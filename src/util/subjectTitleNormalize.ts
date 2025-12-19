@@ -27,7 +27,7 @@ const titleNormalizationCharMap: Map<string, string> = new Map([
 ]);
 
 export const normalizeSubjectTitle = (title: string): string => {
-    let normalizedTitle = title
+    const normalizedTitle = title
         .split("")
         .map((char) => titleNormalizationCharMap.get(char) ?? char)
         .join("")
