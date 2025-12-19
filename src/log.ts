@@ -8,8 +8,8 @@ type indexNContext = {
     length: number;
 };
 
+const irregularCollector = new AsyncLocalStorage<(subject: string, reason: string) => void>();
 const withProcessingStep = new AsyncLocalStorage<ProcessingStepContext>();
-
 const withProcessingContext = new AsyncLocalStorage<
     (
         | {
@@ -66,6 +66,15 @@ const contextTexts = () => {
 export const log = {
     info: (message: string) => {
         console.log([timeText(), stepTexts(), ...contextTexts(), message].filter((v) => v !== null).join(" "));
+    },
+    irregular: (message: string) => {
+        const collector = irregularCollector.getStore();
+        if (collector) {
+            const context = withProcessingContext.getStore() ?? [];
+            const key = context.findLast((c) => c.type === "subjectId")?.subjectId ?? context.findLast((c) => c.type === "serializable")?.serializable.serialize() ?? "";
+            collector(key, message);
+        }
+        console.warn([timeText(), stepTexts(), ...contextTexts(), message].filter((v) => v !== null).join(" "));
     },
 };
 
@@ -126,6 +135,10 @@ export const wrapWithSerializableLogging = <N extends Serializable, R>(fn: (seri
             },
         );
     };
+};
+
+export const runWithIrregularCollector = async <R>(collector: (subject: string, reason: string) => void, fn: () => R | Promise<R>): Promise<R> => {
+    return await irregularCollector.run(collector, fn);
 };
 
 export const wrapWithStepLogging = <A extends unknown[], R>(step: ProcessingStepContext, fn: (...args: A) => R | Promise<R>): ((...args: A) => Promise<R>) => {

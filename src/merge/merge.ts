@@ -96,14 +96,12 @@ export const mergeKdbAndTwinsSubjects = wrapWithStepLogging(
             })[];
         },
         twins: readonly TwinsSubject[],
-    ): Promise<{ irregularSubjects: { key: string; reason: string }[]; mergedSubjects: MergedSubject[] }> => {
+    ): Promise<{ mergedSubjects: MergedSubject[] }> => {
         const kdbFlatSubjectsMap = new Map(kdbFlat.map((subject) => [subject.courseCode, subject]));
         const kdbTreeSubjectsMap = new Map(kdbTree.subjectsFlatList.map((subject) => [subject.courseCode, subject]));
         const twinsSubjectsMap = new Map(twins.map((subject) => [subject.code, subject]));
 
         const subjects = zipMaps(kdbFlatSubjectsMap, kdbTreeSubjectsMap, twinsSubjectsMap);
-
-        const irregularSubjects: { key: string; reason: string }[] = [];
 
         const mergedSubjects: MergedSubject[] = await mapSeries(subjects, ([key, kdbFlatSubject, kdbTreeSubject, twinsSubject]) => {
             return runWithSubjectLogging(key, () => {
@@ -113,17 +111,11 @@ export const mergeKdbAndTwinsSubjects = wrapWithStepLogging(
 
                 if (!kdbFlatSubject) {
                     log.info(`* Subject ${key} not found in kdb flat data`);
-                    irregularSubjects.push({
-                        key,
-                        reason: "Not found in kdb flat data",
-                    });
+                    log.irregular(`* Subject ${key} not found in kdb flat data`);
                 }
                 if (!kdbTreeSubject) {
                     log.info(`* Subject ${key} not found in kdb tree data`);
-                    irregularSubjects.push({
-                        key,
-                        reason: "Not found in kdb tree data",
-                    });
+                    log.irregular(`* Subject ${key} not found in kdb tree data`);
                 }
                 if (!twinsSubject) {
                     // 今年度開講しない科目など
@@ -135,10 +127,7 @@ export const mergeKdbAndTwinsSubjects = wrapWithStepLogging(
 
                         if (!isEqual) {
                             // Log irregular subjects
-                            irregularSubjects.push({
-                                key,
-                                reason: `KDB: ${JSON.stringify(kdb)}, Twins: ${JSON.stringify(twins)}`,
-                            });
+                            log.irregular(`KDB: ${JSON.stringify(kdb)}, Twins: ${JSON.stringify(twins)}`);
                             log.info(`Irregular subject found: ${key}, KdB: ${JSON.stringify(kdb)}, Twins: ${JSON.stringify(twins)}`);
                         }
                         return twins;
@@ -160,19 +149,13 @@ export const mergeKdbAndTwinsSubjects = wrapWithStepLogging(
 
                     if (twinsYear && kdbYear) {
                         if (kdbYear.type !== "normal") {
-                            irregularSubjects.push({
-                                key,
-                                reason: `KDB year type is not normal: ${kdbYear.type}`,
-                            });
+                            log.irregular(`KDB year type is not normal: ${kdbYear.type}`);
                             log.info(`Irregular subject found: ${key}, KdB year type is not normal: ${kdbYear.type}`);
                             return wrapTwinsYear(twinsYear);
                         }
                         const isEqual = arrayShallowEqual(twinsYear, kdbYear.value);
                         if (!isEqual) {
-                            irregularSubjects.push({
-                                key,
-                                reason: `KDB year value: ${JSON.stringify(kdbYear.value)}, Twins year value: ${JSON.stringify(twinsYear)}`,
-                            });
+                            log.irregular(`KDB year value: ${JSON.stringify(kdbYear.value)}, Twins year value: ${JSON.stringify(twinsYear)}`);
                             log.info(`Irregular subject found: ${key}, KdB year value: ${JSON.stringify(kdbYear.value)}, Twins year value: ${JSON.stringify(twinsYear)}`);
                         }
                         return wrapTwinsYear(twinsYear);
@@ -257,7 +240,6 @@ export const mergeKdbAndTwinsSubjects = wrapWithStepLogging(
         });
 
         return {
-            irregularSubjects,
             mergedSubjects,
         };
     },

@@ -4,17 +4,30 @@ import { getKdbFlatData } from "./kdbFlat.js";
 import { getTwinsData } from "./twins.js";
 import { outputReplacer } from "./util/jsonReplacer.js";
 import { mergeKdbAndTwinsSubjects } from "./merge/merge.js";
+import { runWithIrregularCollector } from "./log.js";
 
 const main = async () => {
     await mkdir("output", { recursive: true });
 
-    const kdbTree = await getKdbTreeData();
+    const irregularSubjects: { key: string; reason: string }[] = [];
 
-    const kdbFlat = await getKdbFlatData();
+    const mergedSubjects = await runWithIrregularCollector(
+        (subject, reason) => {
+            irregularSubjects.push({
+                key: subject,
+                reason,
+            });
+        },
+        async () => {
+            const kdbTree = await getKdbTreeData();
 
-    const twins = await getTwinsData();
+            const kdbFlat = await getKdbFlatData();
 
-    const { irregularSubjects, mergedSubjects } = await mergeKdbAndTwinsSubjects(kdbFlat, kdbTree, twins);
+            const twins = await getTwinsData();
+            const mergedSubjects = await mergeKdbAndTwinsSubjects(kdbFlat, kdbTree, twins);
+            return mergedSubjects.mergedSubjects;
+        },
+    );
 
     await writeFile("output/subjects.merged.json", JSON.stringify(mergedSubjects, outputReplacer, 4), "utf8");
 

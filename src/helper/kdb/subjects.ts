@@ -17,6 +17,7 @@ const getSubjectRecords = async (flow: KdBFlowType, requisiteCode: Requisite) =>
     const parsedSearchResult = getSubjectsRecord(searchResultString, requisiteCode.isRoot(), `${requisiteCode.serialize()}.subjects.json`);
     if (requisiteCode.getName() !== parsedSearchResult.category) {
         log.info(`Requisite name mismatch: ${requisiteCode.getName()} !== ${parsedSearchResult.category}`);
+        log.irregular(`Requisite name mismatch: ${requisiteCode.getName()} !== ${parsedSearchResult.category}`);
     }
     const kdbSubjectRecords = await buildKdbSubjects(parsedSearchResult.subjects);
 
