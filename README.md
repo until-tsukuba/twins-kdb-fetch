@@ -37,7 +37,11 @@ type TwinsSubject = {
     raw: [term: string, module: string, code: string, title: { text: string; onclick: string }, instructor: string, affiliation: string, year: string];
 };
 
-type Hierarchy = { value: string | null; text: string }[];
+type Requisite = {
+    id: string;
+    name: string;
+    hasLower: boolean;
+} | null;
 
 type InstructionalType =
     | { text: "その他"; flags: { 講義: false; 演習: false; "実習･実験･実技": false; "卒業論文･卒業研究等": false; その他: true } }
@@ -50,9 +54,10 @@ type InstructionalType =
     | { text: "講義、演習及び実習･実験･実技"; flags: { 講義: true; 演習: true; "実習･実験･実技": true; "卒業論文･卒業研究等": false; その他: false } }
     | { text: "卒業論文･卒業研究等"; flags: { 講義: false; 演習: false; "実習･実験･実技": false; "卒業論文･卒業研究等": true; その他: false } };
 
-type SubjectRecord = {
-    courseNumber: string; // 科目番号
+type KdbSubjectRecord = {
+    courseCode: string; // 科目番号
     courseName: string; // 科目名
+    syllabusLatestLink: null; // シラバス最新リンク
     courseType: InstructionalType & {
         code: string;
     }; // 授業方法
@@ -66,7 +71,7 @@ type SubjectRecord = {
     }; // 標準履修年次
     term: string; // 実施学期
     weekdayAndPeriod: string; // 曜時限
-    classroom: string; // 教室
+    classroom: null; // 教室
     instructor: string; // 担当教員
     overview: string; // 授業概要
     remarks: string; // 備考
@@ -78,18 +83,18 @@ type SubjectRecord = {
     parentNumber: string; // 科目コード
     parentCourseName: string; // 要件科目名
     dataUpdateDate: string; // データ更新日
-    hierarchy: Hierarchy[];
 };
 
-type SubjectRecordWithHierarchy = SubjectRecord & { hierarchy: Hierarchy[] };
+type KdbSubjectRecordWithRequisite = KdbSubjectRecord & { requisite: Requisite[] };
 
 type MergedSubject = {
-    code: string;
-    name: string;
+    code: string; // 科目番号
+    name: string; // 科目名
+    syllabusLatestLink: string | null; // シラバス最新リンク
     instructionalType: {
         value: InstructionalType | null;
         kdbRaw: string | null;
-    };
+    }; // 授業方法
     credits: {
         value:
             | {
@@ -101,39 +106,39 @@ type MergedSubject = {
               }
             | null;
         kdbRaw: string | null;
-    };
+    }; // 単位数
     year: {
         value: number[];
         kdbRaw: string | null;
         twinsRaw: string | null;
-    };
+    }; // 標準履修年次
     terms: {
-        term: Terms | null;
-        module: string | null;
-        weekdayAndPeriod: string | null;
-        moduleTimeTable: ModuleTimeTable | null;
+        term: Terms | null; // 学期
+        module: string | null; // 実施学期
+        weekdayAndPeriod: string | null; // 曜時限
+        moduleTimeTable: ModuleTimeTable | null; // モジュール時間割
 
         twinsRaw: {
             term: string;
             module: string;
         } | null;
     };
-    classroom: null;
+    classroom: null; // 教室
     instructor: {
         value: string[];
 
         kdbRaw: string | null;
         twinsRaw: string | null;
-    };
-    overview: string | null;
-    remarks: string | null;
-    auditor: string | null;
-    conditionsForAuditors: string | null;
-    exchangeStudent: string | null;
-    conditionsForExchangeStudents: string | null;
-    JaEnCourseName: string | null;
-    parentNumber: string | null;
-    parentCourseName: string | null;
+    }; // 担当教員
+    overview: string | null; // 授業概要
+    remarks: string | null; // 備考
+    auditor: string | null; // 科目等履修生申請可否
+    conditionsForAuditors: string | null; // 申請条件
+    exchangeStudent: string ?? null,
+    conditionsForExchangeStudents: string ?? null, // 申請条件
+    JaEnCourseName: string ?? null, // 英語(日本語)科目名
+    parentNumber: string ?? null, // 科目コード
+    parentCourseName: string ?? null, // 要件科目名
 
     affiliation: {
         name: string | null;
@@ -145,34 +150,26 @@ type MergedSubject = {
         } | null;
     };
 
-    kdbDataUpdateDate: string | null;
-
-    hierarchy: Hierarchy[];
+    requisite: Requisite[];
 };
 
 type SubjectNode = {
     type: "subject";
-    node: Hierarchy;
-    subject: SubjectRecord;
+    node: Requisite;
+    subject: KdbSubjectRecord;
     children: null;
-};
-
-type SubCategoryNode = {
-    type: "sub_category";
-    node: Hierarchy;
-    children: SubjectNode[];
 };
 
 type TreeNode =
     | {
           type: "internal";
-          node: Hierarchy;
+          node: Requisite;
           children: TreeNode[];
       }
     | {
           type: "leaf";
-          node: Hierarchy;
-          children: (SubCategoryNode | SubjectNode)[];
+          node: Requisite;
+          children: SubjectNode[];
       };
 ```
 
@@ -190,7 +187,7 @@ type TreeNode =
 
 KdBから取得した木構造のデータ
 
-型: `TreeNode[]`
+型: `TreeNode`
 
 ### output/subjects.flat.kdb.json
 
@@ -198,7 +195,15 @@ KdBから取得した木構造のデータ
 
 KdBから取得した木構造のデータをフラットにしたもの
 
-型: `SubjectRecordWithHierarchy[]`
+型: `KdbSubjectRecordWithRequisite[]`
+
+### output/subjects.flat.shallow.kdb.json
+
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.flat.shallow.kdb.json)
+
+KdBから全件取得したデータ
+
+型: `KdbSubjectRecord[]`
 
 ### output/hierarchy.kdb.txt
 

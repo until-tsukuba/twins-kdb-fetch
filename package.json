@@ -8,6 +8,7 @@
         "fmt": "prettier --write ."
     },
     "dependencies": {
+        "csv-parse": "^6.1.0",
         "dotenv": "^17.0.1",
         "rehype-parse": "^9.0.1",
         "ts-node": "^10.9.2",

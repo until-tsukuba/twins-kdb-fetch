@@ -1,10 +1,9 @@
-import { SubCategory } from "../parser/buildKdbSubCategories";
-import { ReadableSubjectRecord } from "../util/readableSubject";
-import { Hierarchy } from "../util/types";
-import { LeafResultNode, SubCategoryNode, SubjectNode } from "./types";
+import { KdbSubjectRecord } from "../parser/kdb/types.js";
+import { Requisite } from "../util/requisite.js";
+import { SubjectNode } from "./types.js";
 
-const createSubjectNode = (parentNode: Hierarchy, subject: ReadableSubjectRecord): SubjectNode => {
-    const selfNode = parentNode.pushed(subject.courseNumber, subject.courseName);
+const createSubjectNode = (subject: KdbSubjectRecord): SubjectNode => {
+    const selfNode = new Requisite({ id: subject.courseCode, name: subject.courseName, hasLower: false });
     return {
         node: selfNode,
         type: "subject",
@@ -13,34 +12,8 @@ const createSubjectNode = (parentNode: Hierarchy, subject: ReadableSubjectRecord
     };
 };
 
-const createSubjectNodeList = (parentNode: Hierarchy, subjects: ReadableSubjectRecord[]): SubjectNode[] => {
+export const createSubjectNodeList = (subjects: KdbSubjectRecord[]): SubjectNode[] => {
     return subjects.map((subj) => {
-        return createSubjectNode(parentNode, subj);
+        return createSubjectNode(subj);
     });
-};
-
-const createSubCategoryNode = (parentNode: Hierarchy, subjects: ReadableSubjectRecord[], category: string): SubCategoryNode => {
-    const selfNode = parentNode.pushed(null, category);
-    return {
-        node: selfNode,
-        type: "sub_category",
-        children: createSubjectNodeList(selfNode, subjects),
-    };
-};
-
-const createSubCategoryNodeList = (parentNode: Hierarchy, categories: SubCategory[]): SubCategoryNode[] => {
-    return categories.map(({ category, subjects }) => {
-        return createSubCategoryNode(parentNode, subjects, category);
-    });
-};
-
-export const createLeafResultNode = (hierarchy: Hierarchy, categories: SubCategory[]): LeafResultNode[] => {
-    if (categories.length === 0) {
-        return [];
-    }
-
-    if (categories.length === 1 && categories[0] !== undefined && hierarchy.getLength() > 0 && categories[0].category === hierarchy.getLast()?.text) {
-        return createSubjectNodeList(hierarchy, categories[0].subjects);
-    }
-    return createSubCategoryNodeList(hierarchy, categories);
 };

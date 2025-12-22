@@ -1,17 +1,11 @@
-import { ReadableSubjectRecord } from "../util/readableSubject";
-import { Hierarchy } from "../util/types";
+import { KdbSubjectRecord } from "../parser/kdb/types.js";
+import { Requisite } from "../util/requisite.js";
 
 export type SubjectNode = {
     type: "subject";
-    node: Hierarchy;
-    subject: ReadableSubjectRecord;
+    node: Requisite;
+    subject: KdbSubjectRecord;
     children: null;
 };
 
-export type SubCategoryNode = {
-    type: "sub_category";
-    node: Hierarchy;
-    children: SubjectNode[];
-};
-
-export type LeafResultNode = SubCategoryNode | SubjectNode;
+// export type LeafResultNode = SubjectNode;

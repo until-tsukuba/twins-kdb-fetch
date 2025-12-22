@@ -6,11 +6,11 @@ export const commonHeader = [
     { key: "year", text: "標準履修年次" },
     { key: "term", text: "実施学期" },
     { key: "weekdayAndPeriod", text: "曜時限" },
-    { key: "classroom", text: "教室" },
+    // { key: "classroom", text: "教室" },
     { key: "instructor", text: "担当教員" },
     { key: "overview", text: "授業概要" },
     { key: "remarks", text: "備考" },
-    { key: "auditor", text: "科目等履修生申請可否" },
+    { key: "auditor", text: "科目等履修生履修可否" },
     { key: "conditionsForAuditors", text: "申請条件" },
     { key: "exchangeStudent", text: "短期留学生申請可否" },
     { key: "conditionsForExchangeStudents", text: "申請条件" },
@@ -20,4 +20,4 @@ export const commonHeader = [
     { key: "dataUpdateDate", text: "データ更新日" },
 ] as const;
 
-export type RawSubjectRecord = Record<(typeof commonHeader)[number]["key"], string>;
+export type RawKdbSubjectRecord = Record<(typeof commonHeader)[number]["key"], string>;
