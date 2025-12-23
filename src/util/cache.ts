@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { cacheReplacer, cacheReviver } from "./jsonReplacer.js";
+import { useCache } from "../envs.js";
 
 export type Serializer<T> = {
     serialize: (obj: T) => string;
@@ -14,8 +15,6 @@ export const JSONSerializer: <T>() => Serializer<T> = () => ({
         return JSON.parse(str, cacheReviver);
     },
 });
-
-const useCache = true; // Set to false to disable cache for debugging
 
 export const cache =
     <P extends readonly unknown[], R>(cacheKeyFunc: (...props: P) => string, calc: (...props: P) => Promise<R>, serializer: Serializer<R>): ((...props: P) => Promise<R>) =>
