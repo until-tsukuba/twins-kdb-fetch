@@ -36,8 +36,11 @@ export const outputUnsafeObject = (obj: unknown) => {
             }
             return [...path, key];
         },
-        (node) => {
-            return Object.entries(node).map(([k, v]) => ({ key: k, value: v }));
+        ({ value }) => {
+            if (typeof value !== "object" || value === null) {
+                return [];
+            }
+            return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
         },
     );
 };
