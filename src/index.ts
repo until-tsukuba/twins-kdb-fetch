@@ -2,7 +2,7 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { getKdbTreeData } from "./kdbTree.js";
 import { getKdbFlatData } from "./kdbFlat.js";
 import { getTwinsData } from "./twins.js";
-import { outputReplacer } from "./util/jsonReplacer.js";
+import { outputReplacer, outputUnsafeObject } from "./util/jsonReplacer.js";
 import { mergeKdbAndTwinsSubjects } from "./merge/merge.js";
 import { runWithIrregularCollector } from "./log.js";
 
@@ -29,6 +29,7 @@ const main = async () => {
         },
     );
 
+    outputUnsafeObject(mergedSubjects);
     await writeFile("output/subjects.merged.json", JSON.stringify(mergedSubjects, outputReplacer, 4), "utf8");
 
     await writeFile("output/irregularSubjects.txt", irregularSubjects.map((v) => `${v.key}: ${v.reason}`).join("\n"), "utf8");

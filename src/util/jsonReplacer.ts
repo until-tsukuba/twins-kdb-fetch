@@ -1,4 +1,6 @@
+import { log } from "../log.js";
 import { Requisite, RequisiteType } from "./requisite.js";
+import { visit } from "./visit.js";
 
 export const outputReplacer = (_key: string, value: unknown) => {
     if (typeof value === "number" && (isNaN(value) || !isFinite(value))) {
@@ -22,4 +24,20 @@ export const cacheReviver = (_key: string, value: unknown) => {
         return Requisite.fromCacheJSON(value as { type: "requisite"; requisite: RequisiteType });
     }
     return value;
+};
+
+export const outputUnsafeObject = (obj: unknown) => {
+    visit<{ key: string; value: unknown }, string[]>(
+        { key: "", value: obj },
+        [],
+        ({ key, value }, path) => {
+            if (typeof value === "number" && (isNaN(value) || !isFinite(value))) {
+                log.info(`Invalid number at path: ${path.join(".")}, value: ${value}`);
+            }
+            return [...path, key];
+        },
+        (node) => {
+            return Object.entries(node).map(([k, v]) => ({ key: k, value: v }));
+        },
+    );
 };
