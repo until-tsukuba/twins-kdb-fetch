@@ -1,34 +1,28 @@
 // depth first search
 
-const mapSeries = async <T, R>(items: T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
-    const results: R[] = [];
-    for (const item of items) {
-        results.push(await fn(item));
-    }
-    return results;
-};
+import { wrapWithSerializableLogging } from "../log.js";
+import { mapSeries } from "../util/mapSeries.js";
 
 export type DfsTreeNode<N, R> =
     | {
-          type: "internal";
-          node: N;
-          children: DfsTreeNode<N, R>[];
+          readonly type: "internal";
+          readonly node: N;
+          readonly children: readonly DfsTreeNode<N, R>[];
       }
     | {
-          type: "leaf";
-          node: N;
-          children: R;
+          readonly type: "leaf";
+          readonly node: N;
+          readonly children: R;
       };
 
-type Serializable = {
+export type Serializable = {
     serialize(): string;
 };
 
 export const dfs = async <N extends Serializable, R>(root: N, getChildren: (node: N) => Promise<N[]>, leafVisiter: (node: N) => Promise<R>): Promise<DfsTreeNode<N, R>> => {
     const visited = new Map<string, DfsTreeNode<N, R>>();
 
-    const rec = async (node: N): Promise<DfsTreeNode<N, R>> => {
-        console.log(`Visiting node: ${JSON.stringify(node)}`);
+    const rec = wrapWithSerializableLogging(async (node: N): Promise<DfsTreeNode<N, R>> => {
         if (visited.has(node.serialize())) {
             const cached = visited.get(node.serialize());
             if (cached === undefined) {
@@ -57,7 +51,7 @@ export const dfs = async <N extends Serializable, R>(root: N, getChildren: (node
         };
         visited.set(node.serialize(), internalNode);
         return internalNode;
-    };
+    });
 
     return await rec(root);
 };

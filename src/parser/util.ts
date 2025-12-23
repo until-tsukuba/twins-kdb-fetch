@@ -29,14 +29,14 @@ export function assertElementTag(node: ElementContent | undefined, expectedTag: 
     }
 }
 
-const compareArray = <T>(a: T[], b: T[]): boolean => {
+const compareArray = <T>(a: readonly T[], b: readonly T[]): boolean => {
     if (a.length !== b.length) {
         return false;
     }
     return a.every((value, index) => value === b[index]);
 };
 
-export const assertElementClass = (node: Element, expectedClass: string[]) => {
+export const assertElementClass = (node: Element, expectedClass: readonly string[]) => {
     const className = node.properties.className;
     if (!className || !Array.isArray(className) || !compareArray(className, expectedClass)) {
         throw new Error(`Invalid element class: expected ${expectedClass.join(" ")}, got ${className}`);

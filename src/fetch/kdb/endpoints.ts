@@ -20,6 +20,6 @@ export default {
         const form = generateKdBCsvDownloadForm(requisiteCode ?? "");
 
         const res = await reqArrayBuffer(flow, form);
-        return new TextDecoder("shift-jis").decode(Buffer.from(res.ab));
+        return new TextDecoder("shift_jis").decode(Buffer.from(res.ab));
     },
 };

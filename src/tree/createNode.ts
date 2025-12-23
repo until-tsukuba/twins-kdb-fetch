@@ -12,7 +12,7 @@ const createSubjectNode = (subject: KdbSubjectRecord): SubjectNode => {
     };
 };
 
-export const createSubjectNodeList = (subjects: KdbSubjectRecord[]): SubjectNode[] => {
+export const createSubjectNodeList = (subjects: readonly KdbSubjectRecord[]): SubjectNode[] => {
     return subjects.map((subj) => {
         return createSubjectNode(subj);
     });

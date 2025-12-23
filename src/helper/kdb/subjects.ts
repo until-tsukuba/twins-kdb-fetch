@@ -1,5 +1,6 @@
 import endpoints from "../../fetch/endpoints.js";
 import { KdBFlowType } from "../../fetch/kdb/types.js";
+import { log } from "../../log.js";
 import { buildKdbSubjects } from "../../parser/kdb/buildKdbSubject.js";
 import { getSubjectsRecord } from "../../parser/kdb/parseCsv.js";
 import { parseRequisite } from "../../parser/kdb/parseRequisite.js";
@@ -13,11 +14,12 @@ export const getKdbInitFlow = async (): Promise<KdBFlowType> => {
 
 const getSubjectRecords = async (flow: KdBFlowType, requisiteCode: Requisite) => {
     const searchResultString = await endpoints.kdb.outputCsv(flow, requisiteCode.getId());
-    const parsedSearchResult = getSubjectsRecord(searchResultString, requisiteCode.isRoot(), `${requisiteCode.serialize()}.subjects.json`);
+    const parsedSearchResult = getSubjectsRecord(searchResultString, requisiteCode.isRoot());
     if (requisiteCode.getName() !== parsedSearchResult.category) {
-        console.warn(`Requisite name mismatch: ${requisiteCode.getName()} !== ${parsedSearchResult.category}`);
+        log.info(`Requisite name mismatch: ${requisiteCode.getName()} !== ${parsedSearchResult.category}`);
+        log.irregular(`Requisite name mismatch: ${requisiteCode.getName()} !== ${parsedSearchResult.category}`);
     }
-    const kdbSubjectRecords = buildKdbSubjects(parsedSearchResult.subjects);
+    const kdbSubjectRecords = await buildKdbSubjects(parsedSearchResult.subjects);
 
     return kdbSubjectRecords;
 };

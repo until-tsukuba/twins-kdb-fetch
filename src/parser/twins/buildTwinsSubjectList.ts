@@ -1,4 +1,7 @@
+import { log, runWithSubjectLogging } from "../../log.js";
+import { mapSeries } from "../../util/mapSeries.js";
 import { ParsedTwinsTableType } from "./types.js";
+import { assertCeilIsString } from "./util.js";
 
 const twinsHeader = [
     { key: null, text: "No." },
@@ -25,26 +28,25 @@ const periods = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 type Periods = (typeof periods)[number];
 
 type TimeTable = {
-    day: DaysOfWeek; // 曜日
-    period: Periods | null; // 時限
+    readonly day: DaysOfWeek; // 曜日
+    readonly period: Periods | null; // 時限
 };
 
 type Module = "springA" | "springB" | "springC" | "summerVacation" | "fallA" | "fallB" | "fallC" | "springVacation";
-export type ModuleTimeTable = Record<Module, TimeTable[]>;
+export type ModuleTimeTable = Readonly<Record<Module, readonly TimeTable[]>>;
 
 export type TwinsSubject = {
-    name: string; // 科目名
-    code: string; // 科目番号
-    term: Terms;
-    moduleTimeTable: ModuleTimeTable;
-    instructors: string[]; // 担当教員
-    affiliation: {
-        name: string; // 開設所属名
-        code: string; // 開設所属コード
+    readonly name: string; // 科目名
+    readonly code: string; // 科目番号
+    readonly term: Terms;
+    readonly moduleTimeTable: ModuleTimeTable;
+    readonly instructors: readonly string[]; // 担当教員
+    readonly affiliation: {
+        readonly name: string; // 開設所属名
+        readonly code: string; // 開設所属コード
     };
-    year: number[]; // 標準履修年次
-
-    raw: [term: string, module: string, code: string, title: { text: string; onclick: string }, instructor: string, affiliation: string, year: string];
+    readonly year: readonly number[]; // 標準履修年次
+    readonly raw: readonly [term: string, module: string, code: string, title: { text: string; onclick: string }, instructor: string, affiliation: string, year: string];
 };
 
 const assertValidHeader = (header: ParsedTwinsTableType["head"]) => {
@@ -138,7 +140,7 @@ const parseModuleTimeTable = (moduleString: string): ModuleTimeTable => {
             return { modules, timeTables };
         });
 
-    const moduleTimeTable: ModuleTimeTable = {
+    const moduleTimeTable: Readonly<Record<Module, TimeTable[]>> = {
         springA: [],
         springB: [],
         springC: [],
@@ -176,6 +178,15 @@ const parseTitleOnclick = (onclick: string) => {
     return { nendo, termCode, affiliationCode, courseCode, title: title.trim() };
 };
 
+const parseInstructors = (text: string): string[] => {
+    // "宮内 久絵,秋山 肇,松島 亘志,アランニャ, クラウス"
+    const instructorList = text
+        .split(",")
+        .map((instructor) => instructor.trim())
+        .filter((instructor) => instructor);
+    return instructorList;
+};
+
 const parseYear = (yearString: string): number[] => {
     // 1・2・3・4・5年
 
@@ -195,91 +206,81 @@ const parseYear = (yearString: string): number[] => {
         });
 };
 
-const buildTwinsSubject = (row: ParsedTwinsTableType["body"][number]): TwinsSubject => {
-    if (row.length !== twinsHeader.length) {
-        throw new Error(`Row length mismatch: expected ${twinsHeader.length}, got ${row.length}`);
-    }
-
-    // skip
-    const _subjectIndex = row[0];
-    console.log(`Processing subject index: ${_subjectIndex}, ${row[3]}`);
-
-    const termString = row[1];
-    if (typeof termString !== "string") {
-        throw new Error(`Term is not a string: ${JSON.stringify(termString)}`);
-    }
-    const term = terms.find((t) => t.text === termString);
+const parseTerms = (text: string): Terms => {
+    const term = terms.find((t) => t.text === text);
     if (!term) {
-        throw new Error(`Invalid term: ${termString}`);
+        throw new Error(`Invalid term: ${text}`);
     }
-
-    // "春A(火1,火2)、春B(金5,金6)",
-    const moduleString = row[2];
-    if (typeof moduleString !== "string") {
-        throw new Error(`Module is not a string: ${JSON.stringify(moduleString)}`);
-    }
-    const moduleTimeTable = parseModuleTimeTable(moduleString);
-
-    const courseCode = row[3];
-    if (typeof courseCode !== "string") {
-        throw new Error(`Course code is not a string: ${JSON.stringify(courseCode)}`);
-    }
-
-    const courseTitle = row[4];
-    if (typeof courseTitle !== "object" || !courseTitle.text || !courseTitle.onclick) {
-        throw new Error(`Course title is not a valid object: ${JSON.stringify(courseTitle)}`);
-    }
-    const courseOnclick = parseTitleOnclick(courseTitle.onclick);
-    if (courseOnclick.termCode !== term.code) {
-        throw new Error(`Course term code mismatch: expected ${term.code}, got ${courseOnclick.termCode}`);
-    }
-    if (courseOnclick.courseCode !== courseCode) {
-        throw new Error(`Course code mismatch: expected ${courseCode}, got ${courseOnclick.courseCode}`);
-    }
-    if (courseOnclick.title !== courseTitle.text) {
-        throw new Error(`Course title mismatch: expected ${courseTitle.text}, got ${courseOnclick.title}`);
-    }
-
-    const instructors = row[5];
-    if (typeof instructors !== "string") {
-        throw new Error(`Instructors is not a string: ${JSON.stringify(instructors)}`);
-    }
-    // "宮内 久絵,秋山 肇,松島 亘志,アランニャ, クラウス"
-    const instructorList = instructors
-        .split(",")
-        .map((instructor) => instructor.trim())
-        .filter((instructor) => instructor);
-
-    const affiliation = row[6];
-    if (typeof affiliation !== "string") {
-        throw new Error(`Affiliation is not a string: ${JSON.stringify(affiliation)}`);
-    }
-
-    const yearString = row[7];
-    if (typeof yearString !== "string") {
-        throw new Error(`Year is not a string: ${JSON.stringify(yearString)}`);
-    }
-    const year = parseYear(yearString);
-
-    return {
-        name: courseTitle.text,
-        code: courseCode,
-        term,
-        moduleTimeTable: moduleTimeTable,
-        instructors: instructorList,
-        affiliation: {
-            name: affiliation,
-            code: courseOnclick.affiliationCode,
-        },
-        year,
-        raw: [termString, moduleString, courseCode, courseTitle, instructors, affiliation, yearString],
-    };
+    return term;
 };
 
-export const buildTwinsSubjectList = (tableData: ParsedTwinsTableType): TwinsSubject[] => {
+const buildTwinsSubject = (row: ParsedTwinsTableType["body"][number]): Promise<TwinsSubject> => {
+    return runWithSubjectLogging(typeof row[3] === "string" ? row[3] : (row[3]?.text ?? ""), () => {
+        if (row.length !== twinsHeader.length) {
+            throw new Error(`Row length mismatch: expected ${twinsHeader.length}, got ${row.length}`);
+        }
+
+        // skip
+        const _subjectIndex = row[0];
+        log.info(`Processing subject index: ${_subjectIndex}, ${row[3]}`);
+
+        const termString = row[1];
+        assertCeilIsString(termString);
+        const term = parseTerms(termString);
+
+        const moduleString = row[2];
+        assertCeilIsString(moduleString);
+        const moduleTimeTable = parseModuleTimeTable(moduleString);
+
+        const courseCode = row[3];
+        assertCeilIsString(courseCode);
+
+        const courseTitle = row[4];
+        if (typeof courseTitle !== "object" || !courseTitle.text || !courseTitle.onclick) {
+            throw new Error(`Course title is not a valid object: ${JSON.stringify(courseTitle)}`);
+        }
+        const courseOnclick = parseTitleOnclick(courseTitle.onclick);
+        if (courseOnclick.termCode !== term.code) {
+            throw new Error(`Course term code mismatch: expected ${term.code}, got ${courseOnclick.termCode}`);
+        }
+        if (courseOnclick.courseCode !== courseCode) {
+            throw new Error(`Course code mismatch: expected ${courseCode}, got ${courseOnclick.courseCode}`);
+        }
+        if (courseOnclick.title !== courseTitle.text) {
+            throw new Error(`Course title mismatch: expected ${courseTitle.text}, got ${courseOnclick.title}`);
+        }
+
+        const instructors = row[5];
+        assertCeilIsString(instructors);
+        const instructorList = parseInstructors(instructors);
+
+        const affiliation = row[6];
+        assertCeilIsString(affiliation);
+
+        const yearString = row[7];
+        assertCeilIsString(yearString);
+        const year = parseYear(yearString);
+
+        return {
+            name: courseTitle.text,
+            code: courseCode,
+            term,
+            moduleTimeTable: moduleTimeTable,
+            instructors: instructorList,
+            affiliation: {
+                name: affiliation,
+                code: courseOnclick.affiliationCode,
+            },
+            year,
+            raw: [termString, moduleString, courseCode, courseTitle, instructors, affiliation, yearString],
+        };
+    });
+};
+
+export const buildTwinsSubjectList = (tableData: ParsedTwinsTableType): Promise<TwinsSubject[]> => {
     // header check
     assertValidHeader(tableData.head);
 
-    const subjects = tableData.body.map((row) => buildTwinsSubject(row));
+    const subjects = mapSeries(tableData.body, buildTwinsSubject);
     return subjects;
 };

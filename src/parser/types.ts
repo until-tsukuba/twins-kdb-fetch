@@ -1,1 +1,0 @@
-export type ParsedHierarchyType = [{ value: string; text: string }[], { value: string; text: string }[], { value: string; text: string }[], { value: string; text: string }[], { value: string; text: string }[]];

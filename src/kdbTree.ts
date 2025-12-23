@@ -11,14 +11,15 @@ import { createTreeText } from "./tree/createTreeText.js";
 import { outputReplacer } from "./util/jsonReplacer.js";
 import { getChildRequisiteWithCache, getKdbInitFlow, getSubjectRecordsWithCache } from "./helper/kdb/subjects.js";
 import { Requisite } from "./util/requisite.js";
+import { wrapWithStepLogging } from "./log.js";
 
-const getNextHierarchy = async (flow: KdBFlowType, requisite: Requisite) => {
+const getNextHierarchy = (flow: KdBFlowType) => async (requisite: Requisite) => {
     const children = await getChildRequisiteWithCache(flow, requisite);
 
     return children;
 };
 
-const getSubjectRecordTree = async (flow: KdBFlowType, requisite: Requisite) => {
+const getSubjectRecordTree = (flow: KdBFlowType) => async (requisite: Requisite) => {
     const kdbSubjectRecords = await getSubjectRecordsWithCache(flow, requisite);
 
     const subjects = createSubjectNodeList(kdbSubjectRecords);
@@ -26,20 +27,10 @@ const getSubjectRecordTree = async (flow: KdBFlowType, requisite: Requisite) => 
     return subjects;
 };
 
-export const getKdbTreeData = async () => {
+export const getKdbTreeData = wrapWithStepLogging("kdb-tree", async () => {
     const flow = await getKdbInitFlow();
 
-    const tree = await dfs<Requisite, SubjectNode[]>(
-        Requisite.root,
-        async (node) => {
-            console.log(`Processing getNext hierarchy node: ${node.serialize()}`);
-            return await getNextHierarchy(flow, node);
-        },
-        async (node) => {
-            console.log(`Processing getSubjectRecords hierarchy node: ${node.serialize()}`);
-            return await getSubjectRecordTree(flow, node);
-        },
-    );
+    const tree = await dfs<Requisite, SubjectNode[]>(Requisite.root, getNextHierarchy(flow), getSubjectRecordTree(flow));
 
     const subjectsFlatList = createFlatList(tree);
 
@@ -54,6 +45,4 @@ export const getKdbTreeData = async () => {
         subjectsFlatList,
         subjectCategoryText,
     };
-};
-
-// getKdbData();
+});

@@ -3,9 +3,9 @@ import { DfsTreeNode } from "./dfs.js";
 import { SubjectNode } from "./types.js";
 import { visitTree } from "./visitTree.js";
 
-export const createTreeText = (tree: DfsTreeNode<Requisite, SubjectNode[]>) => {
+export const createTreeText = (tree: DfsTreeNode<Requisite, readonly SubjectNode[]>) => {
     const subjectCategoryTextLines: string[] = [];
-    visitTree<DfsTreeNode<Requisite, SubjectNode[]> | SubjectNode>(tree, (node, depth) => {
+    visitTree<DfsTreeNode<Requisite, readonly SubjectNode[]> | SubjectNode>(tree, (node, depth) => {
         if (node.type === "internal" || node.type === "leaf") {
             if (depth === 0) {
                 // root node, skip
