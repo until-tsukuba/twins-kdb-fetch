@@ -47,6 +47,6 @@ export const getSubjectsRecord = (csvStr: string, isRoot: boolean): { category: 
         return parsed.slice(1);
     })(parsed);
 
-    const subjects: RawKdbSubjectRecord[] = clippedParsed.map(line => parseRecord(line));
+    const subjects: RawKdbSubjectRecord[] = clippedParsed.map((line) => parseRecord(line));
     return { category, subjects };
 };

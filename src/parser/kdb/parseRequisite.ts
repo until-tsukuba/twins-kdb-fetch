@@ -69,15 +69,17 @@
  * ```
  */
 
-import { Element } from "hast";
+import { Element } from "../types.js";
 import { assertChildElementLength, assertChildrenLength, assertElementClass, assertElementTag, assertTextNode, generateHtmlParser, isElement } from "../util.js";
 import { ParsedRequisiteType } from "./types.js";
 
 const isRequisiteLi = (node: Element) => {
-    if (node.tagName !== "li") {
+    try {
+        assertElementTag(node, "li");
+        return true;
+    } catch {
         return false;
     }
-    return true;
 };
 
 export const parseRequisite = generateHtmlParser<ParsedRequisiteType>(isRequisiteLi, (requisiteLiList) => {
@@ -85,22 +87,22 @@ export const parseRequisite = generateHtmlParser<ParsedRequisiteType>(isRequisit
         try {
             assertElementTag(liNode, "li");
             assertChildElementLength(liNode, 1);
-            const divNode = liNode.children.filter(isElement)[0];
+            const divNode = liNode.childNodes.filter(isElement)[0];
             assertElementTag(divNode, "div");
             assertElementClass(divNode, ["fg-clickable"]);
 
             assertChildElementLength(divNode, 6);
-            const [anchorNode, nameSpanNode, idSpanNode, typeSpanNode, widgetParamRequisitesSpanNode, hdnLowerSpanNode] = divNode.children.filter(isElement);
+            const [anchorNode, nameSpanNode, idSpanNode, typeSpanNode, widgetParamRequisitesSpanNode, hdnLowerSpanNode] = divNode.childNodes.filter(isElement);
 
             assertElementTag(anchorNode, "a");
             assertChildrenLength(anchorNode, 1);
-            const anchorChildNode = anchorNode.children[0];
+            const anchorChildNode = anchorNode.childNodes[0];
             assertTextNode(anchorChildNode);
             const anchorName = anchorChildNode.value;
 
             assertElementTag(nameSpanNode, "span");
             assertChildrenLength(nameSpanNode, 1);
-            const nameChildNode = nameSpanNode.children[0];
+            const nameChildNode = nameSpanNode.childNodes[0];
             assertTextNode(nameChildNode);
             const name = nameChildNode.value;
 
@@ -110,13 +112,13 @@ export const parseRequisite = generateHtmlParser<ParsedRequisiteType>(isRequisit
 
             assertElementTag(idSpanNode, "span");
             assertChildrenLength(idSpanNode, 1);
-            const idChildNode = idSpanNode.children[0];
+            const idChildNode = idSpanNode.childNodes[0];
             assertTextNode(idChildNode);
             const id = idChildNode.value;
 
             assertElementTag(typeSpanNode, "span");
             assertChildrenLength(typeSpanNode, 1);
-            const typeChildNode = typeSpanNode.children[0];
+            const typeChildNode = typeSpanNode.childNodes[0];
             assertTextNode(typeChildNode);
             const type = typeChildNode.value;
 
@@ -126,7 +128,7 @@ export const parseRequisite = generateHtmlParser<ParsedRequisiteType>(isRequisit
 
             assertElementTag(widgetParamRequisitesSpanNode, "span");
             assertChildrenLength(widgetParamRequisitesSpanNode, 1);
-            const widgetParamRequisitesChildNode = widgetParamRequisitesSpanNode.children[0];
+            const widgetParamRequisitesChildNode = widgetParamRequisitesSpanNode.childNodes[0];
             assertTextNode(widgetParamRequisitesChildNode);
             const widgetParamRequisites = widgetParamRequisitesChildNode.value;
 
@@ -136,13 +138,13 @@ export const parseRequisite = generateHtmlParser<ParsedRequisiteType>(isRequisit
 
             assertElementTag(hdnLowerSpanNode, "span");
             const hasLower = (() => {
-                if (hdnLowerSpanNode.children.length === 0) {
+                if (hdnLowerSpanNode.childNodes.length === 0) {
                     return false;
                 }
-                if (hdnLowerSpanNode.children.length > 1) {
-                    throw new Error(`Invalid hdnLowerSpanNode children length: expected 0 or 1, got ${hdnLowerSpanNode.children.length}`);
+                if (hdnLowerSpanNode.childNodes.length > 1) {
+                    throw new Error(`Invalid hdnLowerSpanNode children length: expected 0 or 1, got ${hdnLowerSpanNode.childNodes.length}`);
                 }
-                const hdnLowerChildNode = hdnLowerSpanNode.children[0];
+                const hdnLowerChildNode = hdnLowerSpanNode.childNodes[0];
                 assertTextNode(hdnLowerChildNode);
                 const hdnLower = hdnLowerChildNode.value;
 
