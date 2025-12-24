@@ -8,3 +8,9 @@ export const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Prom
     }
     return results;
 };
+
+// export const mapSeries = async <T, R>(items: readonly T[], fn: (item: T) => Promise<R>): Promise<R[]> => {
+//     return await Promise.all(items.map((l, i) => {
+//         return runWithIndexNLogging(i, items.length, () => fn(l));
+//     }));
+// };
