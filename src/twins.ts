@@ -1,8 +1,8 @@
-import { writeFile } from "node:fs/promises";
 import endpoints from "./fetch/endpoints.js";
 import { parseTwinsHtml } from "./parser/twins/parseTwinsHtml.js";
 import { buildTwinsSubjectList } from "./parser/twins/buildTwinsSubjectList.js";
 import { wrapWithStepLogging } from "./log.js";
+import { writeOutputJsonFile } from "./util/output.js";
 
 export const getTwinsData = wrapWithStepLogging("twins", async () => {
     const initialFlow = await endpoints.twins.init();
@@ -15,7 +15,7 @@ export const getTwinsData = wrapWithStepLogging("twins", async () => {
     const table = await parseTwinsHtml(htmlBody);
 
     const twinsData = await buildTwinsSubjectList(table);
-    await writeFile("output/subjects.twins.json", JSON.stringify(twinsData, null, 4), "utf8");
+    await writeOutputJsonFile(twinsData, "subjects.twins.json");
 
     return twinsData;
 });

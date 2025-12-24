@@ -1,5 +1,3 @@
-import { writeFile } from "node:fs/promises";
-
 import type { KdBFlowType } from "./fetch/kdb/types.js";
 
 import { dfs } from "./tree/dfs.js";
@@ -8,7 +6,7 @@ import { createSubjectNodeList } from "./tree/createNode.js";
 import { createFlatList } from "./tree/createFlatList.js";
 import { createTreeText } from "./tree/createTreeText.js";
 
-import { outputReplacer, outputUnsafeObject } from "./util/jsonReplacer.js";
+import { writeOutputJsonFile, writeOutputTextFile } from "./util/output.js";
 import { getChildRequisiteWithCache, getKdbInitFlow, getSubjectRecordsWithCache } from "./helper/kdb/subjects.js";
 import { Requisite } from "./util/requisite.js";
 import { wrapWithStepLogging } from "./log.js";
@@ -36,11 +34,9 @@ export const getKdbTreeData = wrapWithStepLogging("kdb-tree", async () => {
 
     const subjectCategoryText = createTreeText(tree);
 
-    outputUnsafeObject(tree);
-    await writeFile("output/tree.kdb.json", JSON.stringify(tree, outputReplacer, 4), "utf8");
-    outputUnsafeObject(subjectsFlatList);
-    await writeFile("output/subjects.flat.kdb.json", JSON.stringify(subjectsFlatList, outputReplacer, 4), "utf8");
-    await writeFile("output/hierarchy.kdb.txt", subjectCategoryText, "utf8");
+    await writeOutputJsonFile(tree, "tree.kdb.json");
+    await writeOutputJsonFile(subjectsFlatList, "subjects.flat.kdb.json");
+    await writeOutputTextFile(subjectCategoryText, "hierarchy.kdb.txt");
 
     return {
         tree,
