@@ -42,7 +42,7 @@ export const writeJsonHook = async (obj: string, filename: string) => {
 
     const allCodes = new Set<string>([...Object.keys(oldData), ...Object.keys(newData)]);
 
-    const diffs: { [ P in string ]: { type: "added" | "removed"; value: unknown } | { type: "modified"; value: unknown; diff: Record<string, { from: unknown; to: unknown }> } } = {};
+    const diffs: { [P in string]: { type: "added" | "removed"; value: unknown } | { type: "modified"; value: unknown; diff: Record<string, { from: unknown; to: unknown }> } } = {};
 
     for (const code of allCodes) {
         const oldEntry = oldData[code];
@@ -81,7 +81,8 @@ export const writeTextHook = async (text: string, filename: string) => {
         .map((part) => {
             const prefix = part.added ? "+" : part.removed ? "-" : " ";
             return part.value
-                .split("\n").slice(0, -1)
+                .split("\n")
+                .slice(0, -1)
                 .map((line) => prefix + line)
                 .join("\n");
         })
