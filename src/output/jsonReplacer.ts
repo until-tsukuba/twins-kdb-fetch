@@ -1,6 +1,6 @@
 import { log } from "../log.js";
-import { Requisite, RequisiteType } from "./requisite.js";
-import { visit } from "./visit.js";
+import { Requisite, RequisiteType } from "../util/requisite.js";
+import { visit } from "../util/visit.js";
 
 export const outputReplacer = (_key: string, value: unknown) => {
     if (typeof value === "number" && (isNaN(value) || !isFinite(value))) {

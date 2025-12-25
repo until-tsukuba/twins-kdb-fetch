@@ -1,5 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { cacheReplacer, cacheReviver } from "./jsonReplacer.js";
+import { cacheReplacer, cacheReviver } from "../output/jsonReplacer.js";
 import { useCache } from "../envs.js";
 
 export type Serializer<T> = {

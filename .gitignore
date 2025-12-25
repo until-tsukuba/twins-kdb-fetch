@@ -2,7 +2,7 @@ dist
 
 *.csv
 node_modules
-output
+./output
 cache
 
 .env

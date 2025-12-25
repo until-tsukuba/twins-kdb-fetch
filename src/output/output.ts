@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import { outputReplacer, outputUnsafeObject } from "./jsonReplacer.js";
 import { writeJsonHook, writeTextHook } from "./diff.js";
-import { Requisite } from "./requisite.js";
+import { Requisite } from "../util/requisite.js";
 import { SubjectNode } from "../tree/types.js";
 import { DfsTreeNode } from "../tree/dfs.js";
 import { KdbSubjectRecord } from "../parser/kdb/types.js";
