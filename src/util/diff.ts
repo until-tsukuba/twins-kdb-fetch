@@ -42,7 +42,7 @@ export const writeJsonHook = async (obj: string, filename: string) => {
 
     const allCodes = new Set<string>([...Object.keys(oldData), ...Object.keys(newData)]);
 
-    const diffs: { [P in string]: { type: "added" | "removed"; value: unknown } | { type: "modified"; value: Record<string, { from: unknown; to: unknown }> } } = {};
+    const diffs: { [ P in string ]: { type: "added" | "removed"; value: unknown } | { type: "modified"; value: unknown; diff: Record<string, { from: unknown; to: unknown }> } } = {};
 
     for (const code of allCodes) {
         const oldEntry = oldData[code];
@@ -65,7 +65,7 @@ export const writeJsonHook = async (obj: string, filename: string) => {
         // modified
 
         const val = diffTwinsSubject(oldEntry as Record<string, unknown>, newEntry as Record<string, unknown>);
-        diffs[code] = { type: "modified", value: val };
+        diffs[code] = { type: "modified", value: newEntry, diff: val };
     }
 
     await writeFile(`output/${filename}.diff.json`, JSON.stringify(diffs, null, 2), "utf8");
