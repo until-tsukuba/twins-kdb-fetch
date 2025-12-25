@@ -15,7 +15,10 @@ export const getTwinsData = wrapWithStepLogging("twins", async () => {
     const table = await parseTwinsHtml(htmlBody);
 
     const twinsData = await buildTwinsSubjectList(table);
-    await writeOutputJsonFile(twinsData, "subjects.twins.json");
+    const twinsDataMap = Object.fromEntries(twinsData.map((s) => [s.code, s]));
+
+    await writeOutputJsonFile(twinsData, "subjects.twins");
+    await writeOutputJsonFile(twinsDataMap, "subjects.twins.map");
 
     return twinsData;
 });

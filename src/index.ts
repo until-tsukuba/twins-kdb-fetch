@@ -28,8 +28,10 @@ const main = async () => {
             return mergedSubjects.mergedSubjects;
         },
     );
+    const mergedSubjectsMap = Object.fromEntries(mergedSubjects.map((s) => [s.code, s]));
 
-    await writeOutputJsonFile(mergedSubjects, "subjects.merged.json");
+    await writeOutputJsonFile(mergedSubjects, "subjects.merged");
+    await writeOutputJsonFile(mergedSubjectsMap, "subjects.merged.map");
     await writeOutputTextFile(irregularSubjects.map((v) => `${v.key}: ${v.reason}`).join("\n"), "irregularSubjects.txt");
 };
 

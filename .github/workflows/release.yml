@@ -34,15 +34,37 @@ jobs:
             - name: install dependencies
               run: |
                   npm ci
+            - name: download latest release artifacts
+              run: |
+                  latest_tag=$(gh release list --limit 1 --json tagName --template '{{(index . 0).tagName}}')
+                  gh release download $latest_tag --dir output
             - name: build
               env:
                   UTID_NAME: ${{ secrets.UTID_NAME }}
                   PASSWORD: ${{ secrets.PASSWORD }}
               run: |
-                  npm run build && npm run start
+                  npm run build
+                  npm run start
             - name: create release
               run: |
                   cd output
-                  gh release create ${{ steps.new_version.outputs.tag }} tree.kdb.json subjects.flat.kdb.json subjects.flat.shallow.kdb.json hierarchy.kdb.txt subjects.twins.json subjects.merged.json irregularSubjects.txt --title "Release ${{ steps.new_version.outputs.tag }}" --generate-notes
+                  gh release create ${{ steps.new_version.outputs.tag }} --title "Release ${{ steps.new_version.outputs.tag }}" --generate-notes \
+                    hierarchy.kdb.txt \
+                    hierarchy.kdb.txt.diff \
+                    irregularSubjects.txt \
+                    irregularSubjects.txt.diff \
+                    subjects.flat.kdb.json \
+                    subjects.flat.kdb.map.diff.json \
+                    subjects.flat.kdb.map.json \
+                    subjects.flat.shallow.kdb.json \
+                    subjects.flat.shallow.kdb.map.diff.json \
+                    subjects.flat.shallow.kdb.map.json \
+                    subjects.merged.json \
+                    subjects.merged.map.diff.json \
+                    subjects.merged.map.json \
+                    subjects.twins.json \
+                    subjects.twins.map.diff.json \
+                    subjects.twins.map.json \
+                    tree.kdb.json
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
