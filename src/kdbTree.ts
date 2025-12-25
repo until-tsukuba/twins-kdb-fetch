@@ -31,11 +31,13 @@ export const getKdbTreeData = wrapWithStepLogging("kdb-tree", async () => {
     const tree = await dfs<Requisite, SubjectNode[]>(Requisite.root, getNextHierarchy(flow), getSubjectRecordTree(flow));
 
     const subjectsFlatList = createFlatList(tree);
+    const subjectsFlatMap = Object.fromEntries(subjectsFlatList.map((s) => [s.courseCode, s]));
 
     const subjectCategoryText = createTreeText(tree);
 
-    await writeOutputJsonFile(tree, "tree.kdb.json");
-    await writeOutputJsonFile(subjectsFlatList, "subjects.flat.kdb.json");
+    await writeOutputJsonFile(tree, "tree.kdb");
+    await writeOutputJsonFile(subjectsFlatList, "subjects.flat.kdb");
+    await writeOutputJsonFile(subjectsFlatMap, "subjects.flat.kdb.map");
     await writeOutputTextFile(subjectCategoryText, "hierarchy.kdb.txt");
 
     return {

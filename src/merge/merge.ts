@@ -9,7 +9,7 @@ import { wrapWithStepLogging, runWithSubjectLogging, log } from "../log.js";
 import { zipMaps } from "./zipMaps.js";
 import { mapSeries } from "../util/mapSeries.js";
 
-type MergedSubject = {
+export type MergedSubject = {
     code: string; // 科目番号
     name: string; // 科目名
     syllabusLatestLink: string | null; // シラバス最新リンク
