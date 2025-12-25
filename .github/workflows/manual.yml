@@ -43,6 +43,8 @@ jobs:
               run: |
                   latest_tag=$(gh release list --limit 1 --json tagName --template '{{(index . 0).tagName}}')
                   gh release download $latest_tag --dir output
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: build
               env:
                   UTID_NAME: ${{ secrets.UTID_NAME }}
