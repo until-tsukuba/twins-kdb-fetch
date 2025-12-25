@@ -1,7 +1,7 @@
 import { getKdbInitFlow, getSubjectRecordsWithCache } from "./helper/kdb/subjects.js";
 import { Requisite } from "./util/requisite.js";
 import { wrapWithStepLogging } from "./log.js";
-import { writeOutputJsonFile } from "./util/output.js";
+import { writeOutputJsonFile } from "./output/output.js";
 
 export const getKdbFlatData = wrapWithStepLogging("kdb-flat", async () => {
     const basicFlow = await getKdbInitFlow();

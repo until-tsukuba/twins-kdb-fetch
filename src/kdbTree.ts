@@ -6,7 +6,7 @@ import { createSubjectNodeList } from "./tree/createNode.js";
 import { createFlatList } from "./tree/createFlatList.js";
 import { createTreeText } from "./tree/createTreeText.js";
 
-import { writeOutputJsonFile, writeOutputTextFile } from "./util/output.js";
+import { writeOutputJsonFile, writeOutputTextFile } from "./output/output.js";
 import { getChildRequisiteWithCache, getKdbInitFlow, getSubjectRecordsWithCache } from "./helper/kdb/subjects.js";
 import { Requisite } from "./util/requisite.js";
 import { wrapWithStepLogging } from "./log.js";
