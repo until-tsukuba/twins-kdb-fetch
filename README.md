@@ -9,7 +9,7 @@ TWINSの科目検索ページにはKdBよりもパースしやすいデータが
 
 ## データフォーマット
 
-実際のデータフォーマットとやや異なる部分があります。
+実際のデータには以下に加えて差分のデータも含まれます。
 
 ```typescript
 type Terms = { text: "春学期"; code: "A" } | { text: "秋学期"; code: "B" };
@@ -63,11 +63,27 @@ type KdbSubjectRecord = {
     }; // 授業方法
     credits: {
         text: string;
-        value: number | null;
+        value: | {
+                  readonly type: "normal";
+                  readonly value: number;
+              }
+            | {
+                  readonly type: "none";
+              }
+            | {
+                  readonly type: "unknown";
+              };
     }; // 単位数
     year: {
         text: string;
-        value: number[];
+        value: 
+            | {
+                  readonly type: "normal";
+                  readonly value: readonly number[];
+              }
+            | {
+                  readonly type: "unknown";
+              };
     }; // 標準履修年次
     term: string; // 実施学期
     weekdayAndPeriod: string; // 曜時限
@@ -98,17 +114,27 @@ type MergedSubject = {
     credits: {
         value:
             | {
-                  type: "number";
+                  type: "normal";
                   value: number;
               }
             | {
                   type: "none";
               }
+            | {
+                  type: "unknown";
+              }
             | null;
         kdbRaw: string | null;
     }; // 単位数
     year: {
-        value: number[];
+        value: 
+            | {
+                  type: "normal";
+                  value: readonly number[];
+              }
+            | {
+                  type: "unknown";
+              };
         kdbRaw: string | null;
         twinsRaw: string | null;
     }; // 標準履修年次
@@ -181,6 +207,14 @@ type TreeNode =
 
 型: `MergedSubject[]`
 
+### output/subjects.merged.map.json
+
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.merged.map.json)
+
+全てを合わせたデータを科目番号をキーとしたマップの形式にしたもの
+
+型: `{ [k: string]: MergedSubject; }`
+
 ### output/tree.kdb.json
 
 [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/tree.kdb.json)
@@ -197,6 +231,14 @@ KdBから取得した木構造のデータをフラットにしたもの
 
 型: `KdbSubjectRecordWithRequisite[]`
 
+### output/subjects.flat.kdb.map.json
+
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.flat.kdb.map.json)
+
+KdBから取得した木構造のデータをフラットにしたものを科目番号をキーとしたマップの形式にしたもの
+
+型: `{ [k: string]: KdbSubjectRecordWithRequisite; }`
+
 ### output/subjects.flat.shallow.kdb.json
 
 [最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.flat.shallow.kdb.json)
@@ -204,6 +246,14 @@ KdBから取得した木構造のデータをフラットにしたもの
 KdBから全件取得したデータ
 
 型: `KdbSubjectRecord[]`
+
+### output/subjects.flat.shallow.kdb.map.json
+
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.flat.shallow.kdb.map.json)
+
+KdBから全件取得したデータを科目番号をキーとしたマップの形式にしたもの
+
+型: `{ [k: string]: KdbSubjectRecord; }`
 
 ### output/hierarchy.kdb.txt
 
@@ -218,6 +268,14 @@ KdBのhierarchyのデータをテキストで読めるもの
 TWINSから持ってきたデータ
 
 型: `TwinsSubject[]`
+
+### output/subjects.twins.map.json
+
+[最新のデータをダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest/download/subjects.twins.map.json)
+
+TWINSから持ってきたデータを科目番号をキーとしたマップの形式にしたもの
+
+型: `{ [k: string]: TwinsSubject; }`
 
 ### output/irregularSubjects.txt
 
