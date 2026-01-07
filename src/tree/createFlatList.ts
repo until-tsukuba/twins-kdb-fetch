@@ -22,12 +22,7 @@ export const createFlatList = (tree: DfsTreeNode<Requisite, readonly SubjectNode
             // assert
             if (existing) {
                 if (!shallowEqual({ ...node.subject, requisite: undefined }, { ...existing, requisite: undefined })) {
-                    if (node.subject.courseCode === "FG30222") {
-                        // TODO: fix kdb data later
-                        console.log("Debug FG30222", { existing, nodeSubject: node.subject });
-                    } else {
-                        throw new Error(`! subject ${node.subject.courseCode} already exists with different data, ${JSON.stringify(existing)} vs ${JSON.stringify(node.subject)}`);
-                    }
+                    throw new Error(`! subject ${node.subject.courseCode} already exists with different data, ${JSON.stringify(existing)} vs ${JSON.stringify(node.subject)}`);
                 }
             }
 
