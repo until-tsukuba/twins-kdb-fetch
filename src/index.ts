@@ -2,7 +2,7 @@ import { mkdir } from "node:fs/promises";
 import { getKdbTreeData } from "./kdbTree.js";
 import { getKdbFlatData } from "./kdbFlat.js";
 import { getTwinsData } from "./twins.js";
-import { writeOutputJsonFile, writeOutputTextFile } from "./util/output.js";
+import { writeOutputJsonFile, writeOutputTextFile } from "./output/output.js";
 import { mergeKdbAndTwinsSubjects } from "./merge/merge.js";
 import { runWithIrregularCollector } from "./log.js";
 

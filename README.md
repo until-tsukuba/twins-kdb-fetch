@@ -2,14 +2,14 @@
 
 ## About
 
-**このプログラムでは認証が必要な`https://twins.tsukuba.ac.jp/`にはアクセスしていません。**
-
 TWINSの科目検索ページにはKdBよりもパースしやすいデータがあります。
 このプログラムではダウンロードした科目データを使いやすくパースしています。
 
 [最新のデータをリリースからダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest)
 
 ## データフォーマット
+
+実際のデータフォーマットとやや異なる部分があります。
 
 ```typescript
 type Terms = { text: "春学期"; code: "A" } | { text: "秋学期"; code: "B" };
