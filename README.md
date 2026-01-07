@@ -7,6 +7,8 @@ TWINSの科目検索ページにはKdBよりもパースしやすいデータが
 
 [最新のデータをリリースからダウンロード](https://github.com/until-tsukuba/twins-kdb-fetch/releases/latest)
 
+このコードは2025年11月のKdBアップデートに対応しています。
+
 ## データフォーマット
 
 実際のデータには以下に加えて差分のデータも含まれます。
