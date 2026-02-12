@@ -20,7 +20,7 @@ type Periods = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 type TimeTable = {
     day: DaysOfWeek; // 曜日
     period: Periods | null; // 時限
-};
+} | null;
 type Module = "springA" | "springB" | "springC" | "summerVacation" | "fallA" | "fallB" | "fallC" | "springVacation";
 type ModuleTimeTable = Record<Module, TimeTable[]>;
 
