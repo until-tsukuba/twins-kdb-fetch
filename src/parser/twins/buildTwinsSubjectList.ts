@@ -30,7 +30,7 @@ type Periods = (typeof periods)[number];
 type TimeTable = {
     readonly day: DaysOfWeek; // 曜日
     readonly period: Periods | null; // 時限
-};
+} | null;
 
 type Module = "springA" | "springB" | "springC" | "summerVacation" | "fallA" | "fallB" | "fallC" | "springVacation";
 export type ModuleTimeTable = Readonly<Record<Module, readonly TimeTable[]>>;
@@ -74,6 +74,10 @@ const includes = <T>(arr: readonly T[], value: unknown): value is T => {
 };
 
 const parseTimeTable = (timeTableString: string): TimeTable => {
+    if (timeTableString === "null") {
+        // [EE31471] 実施モジュール(曜時限): 秋B(null)
+        return null;
+    }
     // "火2" "他" "他1" "月"
     if (!(timeTableString.length === 1 || timeTableString.length === 2)) {
         throw new Error(`Invalid time table string length: ${timeTableString}`);
