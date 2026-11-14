@@ -1,6 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { cacheReplacer, cacheReviver } from "../output/jsonReplacer.js";
-import { useCache } from "../envs.js";
+import { useCache, year } from "../envs.js";
+
+const cacheDir = `cache/${year}`;
 
 export type Serializer<T> = {
     serialize: (obj: T) => string;
@@ -25,12 +27,12 @@ export const cache =
             if (!useCache) {
                 throw new Error("Cache is disabled");
             }
-            const cached = serializer.deserialize(await readFile(`cache/${cacheKey}`, "utf8"));
+            const cached = serializer.deserialize(await readFile(`${cacheDir}/${cacheKey}`, "utf8"));
             return cached;
         } catch {
             const result = await calc(...props);
-            await mkdir("cache", { recursive: true });
-            await writeFile(`cache/${cacheKey}`, serializer.serialize(result), "utf8");
+            await mkdir(cacheDir, { recursive: true });
+            await writeFile(`${cacheDir}/${cacheKey}`, serializer.serialize(result), "utf8");
             return result;
         }
     };

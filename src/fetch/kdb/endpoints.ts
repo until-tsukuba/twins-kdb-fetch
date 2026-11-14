@@ -1,6 +1,6 @@
 import { KdBFlowType } from "./types.js";
 import { addLayoutCookie, assertNonNullableFlow, initialFlow } from "./flow.js";
-import { generateKdBCsvDownloadForm, generateKdBFirstRequisitesForm, generateKdBLowerRequisitesForm } from "./form.js";
+import { generateKdBCsvDownloadForm, generateKdBFirstRequisitesForm, generateKdBLowerRequisitesForm, generateKdBUpdateTermsForm } from "./form.js";
 import { reqArrayBuffer, reqText } from "./request.js";
 
 export default {
@@ -9,6 +9,12 @@ export default {
         assertNonNullableFlow(flow);
         const flowWithLayout = addLayoutCookie(flow);
         return flowWithLayout;
+    },
+    async updateTerms(flow: KdBFlowType): Promise<string> {
+        const form = generateKdBUpdateTermsForm();
+
+        const res = await reqText(flow, form);
+        return res.text;
     },
     async getLowerHierarchy(flow: KdBFlowType, requisiteCode: string | null): Promise<string> {
         const form = requisiteCode ? generateKdBLowerRequisitesForm(requisiteCode) : generateKdBFirstRequisitesForm();
