@@ -249,8 +249,8 @@ const buildTwinsSubject = (row: ParsedTwinsTableType["body"][number]): Promise<T
                     raw: {
                         text: courseTitleRaw,
                         onclick: "",
-                    }
-                }
+                    },
+                };
             }
 
             if (typeof courseTitleRaw !== "object" || !courseTitleRaw.text || !courseTitleRaw.onclick) {

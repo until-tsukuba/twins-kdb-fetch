@@ -1,5 +1,14 @@
 import { year } from "../../envs.js";
 
+export const generateKdBUpdateTermsForm = () => {
+    const form = new URLSearchParams({
+        txtFy: year,
+        action: "updateTerms",
+        pageId: "SB0070",
+    });
+    return form;
+};
+
 export const generateKdBFirstRequisitesForm = () => {
     const form = new URLSearchParams({
         widgetId: "SB0070",

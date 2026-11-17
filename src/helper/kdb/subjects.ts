@@ -9,6 +9,7 @@ import { Requisite } from "../../util/requisite.js";
 
 export const getKdbInitFlow = async (): Promise<KdBFlowType> => {
     const flow = await endpoints.kdb.init();
+    await endpoints.kdb.updateTerms(flow);
     return flow;
 };
 
