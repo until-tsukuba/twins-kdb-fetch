@@ -6,6 +6,7 @@ import { getSubjectsRecord } from "../../parser/kdb/parseCsv.js";
 import { parseRequisite } from "../../parser/kdb/parseRequisite.js";
 import { cache, JSONSerializer } from "../../util/cache.js";
 import { Requisite } from "../../util/requisite.js";
+import { ignoreSubEntry } from "../../envs.js";
 
 export const getKdbInitFlow = async (): Promise<KdBFlowType> => {
     const flow = await endpoints.kdb.init();
@@ -26,7 +27,7 @@ const getSubjectRecords = async (flow: KdBFlowType, requisiteCode: Requisite) =>
 };
 
 export const getSubjectRecordsWithCache = cache(
-    (_flow: KdBFlowType, requisite: Requisite) => `${requisite.serialize()}.subjects.json`,
+    (_flow: KdBFlowType, requisite: Requisite) => `${requisite.serialize()}.subjects${ignoreSubEntry ? ".ignore-sub-entry" : ""}.json`,
     (flow: KdBFlowType, requisite: Requisite) => getSubjectRecords(flow, requisite),
     JSONSerializer(),
 );

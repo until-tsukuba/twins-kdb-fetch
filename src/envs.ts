@@ -10,3 +10,4 @@ const academicYear = (() => {
 })();
 export const year = process.env.YEAR ?? academicYear + "";
 export const useCache = process.env.USE_CACHE?.toLowerCase() === "true";
+export const ignoreSubEntry = process.env.IGNORE_SUB_ENTRY?.toLowerCase() === "true";
