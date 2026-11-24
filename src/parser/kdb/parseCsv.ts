@@ -1,4 +1,5 @@
 import { parse as csvParse } from "csv-parse/sync";
+import { ignoreSubEntry } from "../../envs.js";
 import { commonHeader, RawKdbSubjectRecord } from "./kdbSubjectRecord.js";
 
 const assertHeader = (headerLine: readonly string[]) => {
@@ -48,5 +49,8 @@ export const getSubjectsRecord = (csvStr: string, isRoot: boolean): { category: 
     })(parsed);
 
     const subjects: RawKdbSubjectRecord[] = clippedParsed.map((line) => parseRecord(line));
-    return { category, subjects };
+    return {
+        category,
+        subjects: ignoreSubEntry ? subjects.filter((subject) => subject.courseNumber !== "") : subjects
+    };
 };
